@@ -1,0 +1,2189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema POS - Punto de Venta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="backup-styles.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-cash-register"></i> Sistema POS</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li>
+                    <a href="#" class="nav-item active" data-module="ventas">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Ventas (POS)</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-item" data-module="productos">
+                        <i class="fas fa-box"></i>
+                        <span>Productos</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-item" data-module="salidas">
+                        <i class="fas fa-money-bill-transfer"></i>
+                        <span>Salidas</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-item" data-module="caja">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Caja</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-item" data-module="historial">
+                        <i class="fas fa-history"></i>
+                        <span>Historial de Ventas</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-item" data-module="backup">
+                        <i class="fas fa-database"></i>
+                        <span>Backup</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-title">
+                <h1 id="module-title">Ventas (POS)</h1>
+            </div>
+            <div class="header-info">
+                <span id="datetime"></span>
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Administrador</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Module Content -->
+        <div class="content">
+            <!-- Ventas Module -->
+            <div id="ventas-module" class="module active">
+                <div class="ventas-container">
+                    <div class="productos-section">
+                        <div class="search-bar">
+                            <input type="text" id="search-product" placeholder="Buscar producto...">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="products-grid" id="products-grid">
+                            <!-- Products will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="carrito-section">
+                        <div class="carrito-header">
+                            <h3><i class="fas fa-shopping-basket"></i> Carrito de Compras</h3>
+                        </div>
+                        <div class="carrito-items" id="carrito-items">
+                            <p class="empty-cart">El carrito está vacío</p>
+                        </div>
+                        <div class="carrito-summary">
+                            <div class="summary-row">
+                                <span>Total:</span>
+                                <span id="total">$0</span>
+                            </div>
+                        </div>
+                        <button class="btn-primary btn-full" id="finalizar-venta">
+                            <i class="fas fa-credit-card"></i> Finalizar Venta
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Productos Module -->
+            <div id="productos-module" class="module">
+                <div class="module-header">
+                    <h2>Productos</h2>
+                    <button class="btn-primary" id="agregar-producto">
+                        <i class="fas fa-plus"></i> Agregar Producto
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Precio</th>
+                                <th>Tipo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productos-table">
+                            <!-- Products will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Historial Module -->
+            <div id="historial-module" class="module">
+                <div class="module-header">
+                    <h2>Historial de Ventas</h2>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID Orden</th>
+                                <th>Fecha</th>
+                                <th>Total</th>
+                                <th>Método Pago</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historial-table">
+                            <!-- Sales history will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Salidas Module -->
+            <div id="salidas-module" class="module">
+                <div class="module-header">
+                    <h2>Gestión de Salidas</h2>
+                    <button class="btn-primary" id="agregar-salida">
+                        <i class="fas fa-plus"></i> Agregar Salida
+                    </button>
+                </div>
+                
+                <!-- Resumen Diario -->
+                <div class="dashboard-grid">
+                    <div class="dashboard-card income">
+                        <div class="card-header">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>Ingresos del Día</h3>
+                        </div>
+                        <div class="card-value" id="ingresos-dia">$0</div>
+                    </div>
+                    <div class="dashboard-card expense">
+                        <div class="card-header">
+                            <i class="fas fa-money-bill-transfer-alt"></i>
+                            <h3>Salidas del Día</h3>
+                        </div>
+                        <div class="card-value" id="salidas-dia">$0</div>
+                    </div>
+                    <div class="dashboard-card balance" id="balance-card">
+                        <div class="card-header">
+                            <i class="fas fa-balance-scale"></i>
+                            <h3>Balance del Día</h3>
+                        </div>
+                        <div class="card-value" id="balance-dia">$0</div>
+                    </div>
+                </div>
+
+                <!-- Lista de Salidas -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha y Hora</th>
+                                <th>Concepto</th>
+                                <th>Categoría</th>
+                                <th>Monto</th>
+                                <th>Método Pago</th>
+                                <th>Responsable</th>
+                                <th>Comprobante</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salidas-table">
+                            <!-- Salidas will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Caja Module -->
+            <div id="caja-module" class="module">
+                <div id="caja-cerrada" class="caja-state">
+                    <div class="caja-message">
+                        <i class="fas fa-lock"></i>
+                        <h2>Caja Cerrada</h2>
+                        <p>La caja está actualmente cerrada</p>
+                        <button class="btn-primary btn-large" id="abrir-caja">
+                            <i class="fas fa-unlock"></i> ABRIR CAJA
+                        </button>
+                    </div>
+                </div>
+                <div id="caja-abierta" class="caja-state hidden">
+                    <div class="caja-dashboard">
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <h3>Saldo Inicial</h3>
+                            </div>
+                            <div class="card-value" id="saldo-inicial">$0</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <i class="fas fa-chart-line"></i>
+                                <h3>Total Ventas</h3>
+                            </div>
+                            <div class="card-value" id="total-ventas">$0</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <i class="fas fa-calculator"></i>
+                                <h3>Salidas del Día</h3>
+                            </div>
+                            <div class="card-value" id="salidas-caja">$0</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <i class="fas fa-balance-scale"></i>
+                                <h3>Saldo Esperado</h3>
+                            </div>
+                            <div class="card-value" id="saldo-esperado">$0</div>
+                        </div>
+                    </div>
+                    <div class="caja-actions">
+                        <button class="btn-danger" id="cerrar-caja">
+                            <i class="fas fa-lock"></i> CERRAR CAJA
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Backup Module -->
+
+            <!-- Backup Module -->
+            <div id="backup-module" class="module">
+                <div class="module-header">
+                    <h2>Backup y Restauración</h2>
+                </div>
+                <div class="backup-container">
+                    <div class="backup-section">
+                        <h3><i class="fas fa-download"></i> Exportar Datos</h3>
+                        <p>Exporta todos tus datos (productos, ventas, caja, salidas) a un archivo JSON</p>
+                        <div class="backup-items">
+                            <div class="backup-item">
+                                <strong>Productos:</strong> <span id="backup-products-count">0</span> productos
+                            </div>
+                            <div class="backup-item">
+                                <strong>Ventas:</strong> <span id="backup-sales-count">0</span> ventas
+                            </div>
+                            <div class="backup-item">
+                                <strong>Caja:</strong> <span id="backup-cash-status">Cerrada</span>
+                            </div>
+                        </div>
+                        <button class="btn-primary" id="export-backup">
+                            <i class="fas fa-download"></i> Exportar Backup Completo
+                        </button>
+                        <button class="btn-secondary" id="export-products">
+                            <i class="fas fa-box"></i> Exportar Solo Productos
+                        </button>
+                    </div>
+                    
+                    <div class="backup-section">
+                        <h3><i class="fas fa-upload"></i> Importar Datos</h3>
+                        <p>Importa un backup previo para restaurar todos tus datos</p>
+                        <div class="import-area">
+                            <input type="file" id="import-file" accept=".json" style="display: none;">
+                            <div class="file-drop-zone" id="file-drop-zone">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Arrastra un archivo JSON aquí o haz clic para seleccionar</p>
+                                <button class="btn-secondary" id="select-file">
+                                    <i class="fas fa-folder-open"></i> Seleccionar Archivo
+                                </button>
+                            </div>
+                            <div id="import-preview" class="import-preview" style="display: none;">
+                                <h4>Vista Previa del Backup:</h4>
+                                <div id="preview-content"></div>
+                                <div class="import-actions">
+                                    <button class="btn-primary" id="confirm-import">
+                                        <i class="fas fa-check"></i> Confirmar Importación
+                                    </button>
+                                    <button class="btn-secondary" id="cancel-import">
+                                        <i class="fas fa-times"></i> Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="backup-section">
+                        <h3><i class="fas fa-tools"></i> Herramientas</h3>
+                        <div class="tools-grid">
+                            <button class="btn-secondary" id="clear-products">
+                                <i class="fas fa-trash"></i> Limpiar Productos
+                            </button>
+                            <button class="btn-secondary" id="clear-sales">
+                                <i class="fas fa-trash"></i> Limpiar Ventas
+                            </button>
+                            <button class="btn-secondary" id="clear-salidas">
+                                <i class="fas fa-trash"></i> Limpiar Salidas
+                            </button>
+                            <button class="btn-danger" id="reset-all">
+                                <i class="fas fa-exclamation-triangle"></i> Restablecer Todo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <!-- Agregar/Editar Producto Modal -->
+    <div id="producto-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Agregar Producto</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="producto-form">
+                <div class="form-group">
+                    <label for="producto-codigo">Código</label>
+                    <input type="text" id="producto-codigo" required>
+                </div>
+                <div class="form-group">
+                    <label for="producto-nombre">Nombre</label>
+                    <input type="text" id="producto-nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="producto-categoria">Categoría</label>
+                    <select id="producto-categoria" required>
+                        <option value="">Seleccionar categoría</option>
+                        <option value="Helados">Helados</option>
+                        <option value="Bebidas">Bebidas</option>
+                        <option value="Postres">Postres</option>
+                        <option value="Otros">Otros</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="producto-precio">Precio Venta</label>
+                        <input type="number" id="producto-precio" step="1000" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="producto-tipo">Tipo</label>
+                        <select id="producto-tipo" required>
+                            <option value="preparado">Preparado (no requiere stock)</option>
+                            <option value="inventario">Inventario (requiere stock)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="producto-imagen">Imagen (Emoji o URL)</label>
+                    <input type="text" id="producto-imagen" placeholder="📦">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary cancel-btn">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Abrir Caja Modal -->
+    <div id="abrir-caja-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Abrir Caja</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="abrir-caja-form">
+                <div class="form-group">
+                    <label for="caja-saldo-inicial">Saldo Inicial</label>
+                    <input type="number" id="caja-saldo-inicial" step="1000" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary cancel-btn">Cancelar</button>
+                    <button type="submit" class="btn-primary">Abrir Caja</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cerrar Caja Modal -->
+    <div id="cerrar-caja-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📊 Cierre de Caja Detallado</h3>
+                <span class="close">&times;</span>
+            </div>
+            
+            <!-- Resumen Completo del Día -->
+            <div class="cierre-detalles">
+                <h4>💰 Resumen del Día</h4>
+                <div class="cierre-grid">
+                    <div class="cierre-card income">
+                        <div class="cierre-label">Dinero en Efectivo</div>
+                        <div class="cierre-value" id="efectivo-total">$0</div>
+                    </div>
+                    <div class="cierre-card income">
+                        <div class="cierre-label">Dinero en Transferencias</div>
+                        <div class="cierre-value" id="transferencias-total">$0</div>
+                    </div>
+                    <div class="cierre-card income">
+                        <div class="cierre-label">Dinero en Apps</div>
+                        <div class="cierre-value" id="apps-total">$0</div>
+                    </div>
+                    <div class="cierre-card total-income">
+                        <div class="cierre-label">💵 Total Ganado</div>
+                        <div class="cierre-value" id="total-ganado">$0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Deducciones -->
+            <div class="cierre-detalles">
+                <h4>💸 Deducciones</h4>
+                <div class="cierre-grid">
+                    <div class="cierre-card expense">
+                        <div class="cierre-label">Dinero en Salidas</div>
+                        <div class="cierre-value" id="salidas-total">$0</div>
+                    </div>
+                    <div class="cierre-card final-balance">
+                        <div class="cierre-label">💰 Dinero Final</div>
+                        <div class="cierre-value" id="dinero-final">$0</div>
+                    </div>
+                </div>
+            </div>
+
+            <form id="cerrar-caja-form">
+                <div class="form-group">
+                    <label for="caja-dinero-real">💵 Dinero Real en Caja (Conteo Físico)</label>
+                    <input type="number" id="caja-dinero-real" step="100" required>
+                    <small>Ingrese el conteo físico de todo el dinero en caja</small>
+                </div>
+                
+                <!-- Resumen Comparativo -->
+                <div class="caja-resumen">
+                    <div class="resumen-row">
+                        <span>💰 Sistema Espera:</span>
+                        <span id="total-sistema">$0</span>
+                    </div>
+                    <div class="resumen-row">
+                        <span>💵 Dinero Real:</span>
+                        <span id="dinero-real-input">$0</span>
+                    </div>
+                    <div class="resumen-row diferencia" id="diferencia-row">
+                        <span>📊 Diferencia:</span>
+                        <span id="diferencia">$0</span>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary cancel-btn">Cancelar</button>
+                    <button type="submit" class="btn-primary">✅ Confirmar Cierre</button>
+                    <button type="button" class="btn-info" id="imprimir-cierre">
+                        <i class="fas fa-print"></i> Imprimir Reporte
+                    </button>
+                    <button type="button" class="btn-success" id="enviar-whatsapp">
+                        <i class="fas fa-whatsapp"></i> Enviar a WhatsApp
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Finalizar Venta Modal -->
+    <div id="finalizar-venta-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Finalizar Venta</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="venta-resumen">
+                <div class="resumen-row">
+                    <span>Subtotal:</span>
+                    <span id="venta-subtotal">$0</span>
+                </div>
+                <div class="resumen-row total">
+                    <span>Total:</span>
+                    <span id="venta-total">$0</span>
+                </div>
+            </div>
+            <form id="finalizar-venta-form">
+                <div class="form-group">
+                    <label for="metodo-pago">Método de Pago</label>
+                    <select id="metodo-pago" required>
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="App Domicilios">App Domicilios</option>
+                        <option value="Transferencia">Transferencia</option>
+                    </select>
+                </div>
+                <div class="form-group" id="monto-recibido-group">
+                    <label for="monto-recibido">Monto Recibido</label>
+                    <div class="monto-recibido-container">
+                        <input type="number" id="monto-recibido" step="1000" placeholder="0">
+                        <div class="billetes-rapidos">
+                            <h4>Billetes Rápidos:</h4>
+                            <div class="billetes-grid">
+                                <div class="billete" data-value="2000">
+                                    <div class="billete-icon">💵</div>
+                                    <span>$2.000</span>
+                                </div>
+                                <div class="billete" data-value="5000">
+                                    <div class="billete-icon">💵</div>
+                                    <span>$5.000</span>
+                                </div>
+                                <div class="billete" data-value="10000">
+                                    <div class="billete-icon">💴</div>
+                                    <span>$10.000</span>
+                                </div>
+                                <div class="billete" data-value="20000">
+                                    <div class="billete-icon">💶</div>
+                                    <span>$20.000</span>
+                                </div>
+                                <div class="billete" data-value="50000">
+                                    <div class="billete-icon">💷</div>
+                                    <span>$50.000</span>
+                                </div>
+                                <div class="billete" data-value="100000">
+                                    <div class="billete-icon">💸</div>
+                                    <span>$100.000</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group" id="cambio-group" style="display: none;">
+                    <label>Cambio:</label>
+                    <span id="cambio">$0</span>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary cancel-btn">Cancelar</button>
+                    <button type="submit" class="btn-primary">Confirmar Venta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // POS System - Fixed Version
+        class POSSystem {
+            constructor() {
+                this.currentModule = 'ventas';
+                this.cart = [];
+                this.editingProductId = null;
+                this.init();
+            }
+
+            init() {
+                this.initializeData();
+                this.setupEventListeners();
+                this.updateDateTime();
+                this.switchModule('ventas');
+            }
+
+            initializeData() {
+                // Initialize products only if they don't exist in sessionStorage
+                if (!sessionStorage.getItem('initialized')) {
+                    // First time loading - clear localStorage and set up fresh data
+                    localStorage.clear();
+                    
+                    const defaultProducts = [
+                        { id: 1, code: '001', name: 'Cono de 1 bola', category: 'Helados', price: 4000, type: 'preparado', image: '🍦' },
+                        { id: 2, code: '002', name: 'Cono de 2 bolas', category: 'Helados', price: 7000, type: 'preparado', image: '🍦' },
+                        { id: 3, code: '003', name: 'Bola adicional', category: 'Helados', price: 3500, type: 'preparado', image: '🍨' },
+                        { id: 4, code: '004', name: 'Cucurucho 1 bola + salsa', category: 'Helados', price: 5000, type: 'preparado', image: '🍧' },
+                        { id: 5, code: '005', name: 'Cucurucho 2 bolas + salsa', category: 'Helados', price: 8000, type: 'preparado', image: '🍧' },
+                        { id: 6, code: '006', name: 'Cucurucho 3 bolas + salsa', category: 'Helados', price: 10000, type: 'preparado', image: '🍧' },
+                        { id: 7, code: '007', name: 'Concha de 2 bolas', category: 'Helados', price: 12000, type: 'preparado', image: '🥐' },
+                        { id: 8, code: '008', name: 'Concha de 3 bolas', category: 'Helados', price: 14000, type: 'preparado', image: '🥐' },
+                        { id: 9, code: '009', name: 'Concha de 4 bolas', category: 'Helados', price: 17000, type: 'preparado', image: '🥐' },
+                        { id: 10, code: '010', name: 'Helado con queso', category: 'Helados', price: 11000, type: 'preparado', image: '🧀' },
+                        { id: 11, code: '011', name: 'Salpicón 8oz', category: 'Bebidas', price: 6000, type: 'preparado', image: '🥤' },
+                        { id: 12, code: '012', name: 'Salpicón 12oz', category: 'Bebidas', price: 7000, type: 'preparado', image: '🥤' },
+                        { id: 13, code: '013', name: 'Salpicón con helado 12oz', category: 'Bebidas', price: 9000, type: 'preparado', image: '🥤' },
+                        { id: 14, code: '014', name: 'Salpicón con helado 16oz', category: 'Bebidas', price: 12000, type: 'preparado', image: '🥤' },
+                        { id: 15, code: '015', name: 'Banana split', category: 'Postres', price: 17500, type: 'preparado', image: '🍌' },
+                        { id: 16, code: '016', name: 'Ensalada de frutas pequeña sencilla', category: 'Postres', price: 12000, type: 'preparado', image: '🍓' },
+                        { id: 17, code: '017', name: 'Ensalada grande sencilla', category: 'Postres', price: 14500, type: 'preparado', image: '🥗' },
+                        { id: 18, code: '018', name: 'Ensalada pequeña especial', category: 'Postres', price: 16000, type: 'preparado', image: '🥗' },
+                        { id: 19, code: '019', name: 'Ensalada grande especial', category: 'Postres', price: 18000, type: 'preparado', image: '🥗' },
+                        { id: 20, code: '020', name: 'Obleas', category: 'Postres', price: 7500, type: 'preparado', image: '🍪' },
+                        { id: 21, code: '021', name: 'Malteada sencilla', category: 'Bebidas', price: 14000, type: 'preparado', image: '🥤' },
+                        { id: 22, code: '022', name: 'Malteada especial', category: 'Bebidas', price: 17000, type: 'preparado', image: '🥤' },
+                        { id: 23, code: '023', name: 'Jugo en agua', category: 'Bebidas', price: 5500, type: 'preparado', image: '🧃' },
+                        { id: 24, code: '024', name: 'Jugo en leche', category: 'Bebidas', price: 7500, type: 'preparado', image: '🥛' },
+                        { id: 25, code: '025', name: 'Sodas saborizadas', category: 'Bebidas', price: 11000, type: 'preparado', image: '🧋' },
+                        { id: 26, code: '026', name: 'Limonada', category: 'Bebidas', price: 10000, type: 'preparado', image: '🍋' },
+                        { id: 27, code: '027', name: 'Café granizado', category: 'Bebidas', price: 9500, type: 'preparado', image: '☕' },
+                        { id: 28, code: '028', name: 'Afogatto', category: 'Bebidas', price: 7000, type: 'preparado', image: '☕' },
+                        { id: 29, code: '029', name: 'Fresas con crema 8oz', category: 'Postres', price: 9000, type: 'preparado', image: '🍓' },
+                        { id: 30, code: '030', name: 'Fresas con crema 12oz', category: 'Postres', price: 13000, type: 'preparado', image: '🍓' },
+                        { id: 31, code: '031', name: 'Fresas con crema 16oz', category: 'Postres', price: 16000, type: 'preparado', image: '🍓' },
+                        { id: 32, code: '032', name: 'Agua 250ml', category: 'Bebidas', price: 2000, type: 'inventario', image: '💧' },
+                        { id: 33, code: '033', name: 'Gaseosa 250ml', category: 'Bebidas', price: 2800, type: 'inventario', image: '🥤' },
+                        { id: 34, code: '034', name: 'Soda 350ml', category: 'Bebidas', price: 2800, type: 'inventario', image: '🍾' },
+                        { id: 35, code: '035', name: 'Wafle salado doble porción de queso', category: 'Postres', price: 17000, type: 'preparado', image: '🧇' },
+                        { id: 36, code: '036', name: 'Wafle fresa y crema de avellanas', category: 'Postres', price: 19000, type: 'preparado', image: '🧇' },
+                        { id: 37, code: '037', name: 'Wafle banano y arequipe', category: 'Postres', price: 17000, type: 'preparado', image: '🧇' },
+                        { id: 38, code: '038', name: 'Wafle frutas', category: 'Postres', price: 19000, type: 'preparado', image: '🧇' },
+                        { id: 39, code: '039', name: 'Wafle doble queso con arequipe', category: 'Postres', price: 19000, type: 'preparado', image: '🧇' },
+                        { id: 40, code: '040', name: 'Wafle Valeria', category: 'Postres', price: 19000, type: 'preparado', image: '🧇' },
+                        { id: 41, code: '041', name: 'Wafle amor', category: 'Postres', price: 15500, type: 'preparado', image: '❤️' },
+                        { id: 42, code: '042', name: 'Waffles personajes', category: 'Postres', price: 15500, type: 'preparado', image: '🎭' },
+                        { id: 43, code: '043', name: 'Waffles infantiles', category: 'Postres', price: 13500, type: 'preparado', image: '🎈' },
+                        { id: 44, code: '044', name: 'Helados infantiles', category: 'Helados', price: 10000, type: 'preparado', image: '🍦' },
+                        { id: 45, code: '045', name: 'Gusanito infantil', category: 'Postres', price: 12000, type: 'preparado', image: '🐛' },
+                        { id: 46, code: '046', name: 'Copas especiales', category: 'Postres', price: 17000, type: 'preparado', image: '🍧' },
+                        { id: 47, code: '047', name: 'Copa banano fresa', category: 'Postres', price: 17500, type: 'preparado', image: '🍌' },
+                        { id: 48, code: '048', name: 'Copa frutos rojos', category: 'Postres', price: 17500, type: 'preparado', image: '🍓' },
+                        { id: 49, code: '049', name: 'Copa fresa y crema de chocolate', category: 'Postres', price: 17500, type: 'preparado', image: '🍓' },
+                        { id: 50, code: '050', name: 'Copa pasión de chocolate', category: 'Postres', price: 18000, type: 'preparado', image: '🍫' }
+                    ];
+                    localStorage.setItem('products', JSON.stringify(defaultProducts));
+                    
+                    // Mark as initialized in sessionStorage
+                    sessionStorage.setItem('initialized', 'true');
+                    console.log('Products initialized in localStorage');
+                }
+
+                // Initialize sales history if empty
+                if (!localStorage.getItem('salesHistory')) {
+                    localStorage.setItem('salesHistory', JSON.stringify([]));
+                }
+
+                // Initialize cash register if empty
+                if (!localStorage.getItem('cashRegister')) {
+                    const cashRegister = { isOpen: false, initialBalance: 0, totalSales: 0 };
+                    localStorage.setItem('cashRegister', JSON.stringify(cashRegister));
+                    sessionStorage.setItem('cashRegister', JSON.stringify(cashRegister));
+                }
+
+                // Initialize salidas if empty
+                if (!localStorage.getItem('salidas')) {
+                    localStorage.setItem('salidas', JSON.stringify([]));
+                }
+            }
+
+            setupEventListeners() {
+                console.log('Setting up event listeners...');
+
+                // Navigation
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const module = item.dataset.module;
+                        this.switchModule(module);
+                    });
+                });
+
+                // Search
+                const searchInput = document.getElementById('search-product');
+                if (searchInput) {
+                    searchInput.addEventListener('input', (e) => {
+                        this.filterProducts(e.target.value);
+                    });
+                }
+
+                // Add product button
+                const addProductBtn = document.getElementById('agregar-producto');
+                if (addProductBtn) {
+                    addProductBtn.addEventListener('click', () => {
+                        this.openProductModal();
+                    });
+                }
+
+                // Product form
+                const productForm = document.getElementById('producto-form');
+                if (productForm) {
+                    productForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.saveProduct();
+                    });
+                }
+
+            // Salidas button
+                const agregarSalidaBtn = document.getElementById('agregar-salida');
+                if (agregarSalidaBtn) {
+                    agregarSalidaBtn.addEventListener('click', () => {
+                        this.openSalidaModal();
+                    });
+                }
+
+                // Cash register buttons
+                const abrirCajaBtn = document.getElementById('abrir-caja');
+                if (abrirCajaBtn) {
+                    abrirCajaBtn.addEventListener('click', () => {
+                        this.openOpenCashModal();
+                    });
+                }
+
+                const cerrarCajaBtn = document.getElementById('cerrar-caja');
+                if (cerrarCajaBtn) {
+                    cerrarCajaBtn.addEventListener('click', () => {
+                        this.openCloseCashModal();
+                    });
+                }
+
+                // Cash register forms
+                const abrirCajaForm = document.getElementById('abrir-caja-form');
+                if (abrirCajaForm) {
+                    abrirCajaForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.openCashRegister();
+                    });
+                }
+
+                const cerrarCajaForm = document.getElementById('cerrar-caja-form');
+                if (cerrarCajaForm) {
+                    cerrarCajaForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.closeCashRegister();
+                    });
+                }
+
+                // Finalize sale - FIXED: Moved to setupEventListeners
+                const finalizarVentaBtn = document.getElementById('finalizar-venta');
+                if (finalizarVentaBtn) {
+                    console.log('Found finalizar-venta button, adding listener...');
+                    finalizarVentaBtn.addEventListener('click', () => {
+                        console.log('Finalizar venta button clicked');
+                        this.openFinalizeSaleModal();
+                    });
+                } else {
+                    console.error('finalizar-venta button not found!');
+                }
+
+                // Finalize sale form
+                const finalizarVentaForm = document.getElementById('finalizar-venta-form');
+                if (finalizarVentaForm) {
+                    finalizarVentaForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.finalizeSale();
+                    });
+                }
+
+                // Payment method change
+                const metodoPago = document.getElementById('metodo-pago');
+                if (metodoPago) {
+                    metodoPago.addEventListener('change', (e) => {
+                        this.toggleMontoRecibido(e.target.value);
+                    });
+                }
+
+                // Amount received input
+                const montoRecibido = document.getElementById('monto-recibido');
+                if (montoRecibido) {
+                    montoRecibido.addEventListener('input', () => {
+                        this.calculateChange();
+                    });
+                }
+
+                // Dinero real input
+                const dineroReal = document.getElementById('caja-dinero-real');
+                if (dineroReal) {
+                    dineroReal.addEventListener('input', () => {
+                        this.updateCloseCashModal();
+                    });
+                }
+
+                // Billetes rápidos
+                document.querySelectorAll('.billete').forEach(billete => {
+                    billete.addEventListener('click', () => {
+                        const value = parseInt(billete.dataset.value);
+                        const montoInput = document.getElementById('monto-recibido');
+                        const currentValue = parseInt(montoInput.value) || 0;
+                        montoInput.value = currentValue + value;
+                        billete.classList.toggle('selected');
+                        this.calculateChange();
+                    });
+                });
+
+                // Modal close buttons
+                document.querySelectorAll('.close, .cancel-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.closeAllModals();
+                    });
+                });
+
+                // Click outside modal to close
+                window.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('modal')) {
+                        this.closeAllModals();
+                    }
+                });
+
+                // Backup event listeners
+                const exportBackupBtn = document.getElementById('export-backup');
+                if (exportBackupBtn) {
+                    exportBackupBtn.addEventListener('click', () => {
+                        this.exportFullBackup();
+                    });
+                }
+
+                const exportProductsBtn = document.getElementById('export-products');
+                if (exportProductsBtn) {
+                    exportProductsBtn.addEventListener('click', () => {
+                        this.exportProducts();
+                    });
+                }
+
+                const selectFileBtn = document.getElementById('select-file');
+                if (selectFileBtn) {
+                    selectFileBtn.addEventListener('click', () => {
+                        document.getElementById('import-file').click();
+                    });
+                }
+
+                const importFile = document.getElementById('import-file');
+                if (importFile) {
+                    importFile.addEventListener('change', (e) => {
+                        this.handleFileImport(e);
+                    });
+                }
+
+                const confirmImportBtn = document.getElementById('confirm-import');
+                if (confirmImportBtn) {
+                    confirmImportBtn.addEventListener('click', () => {
+                        this.confirmImport();
+                    });
+                }
+
+                const cancelImportBtn = document.getElementById('cancel-import');
+                if (cancelImportBtn) {
+                    cancelImportBtn.addEventListener('click', () => {
+                        this.cancelImport();
+                    });
+                }
+
+                const clearProductsBtn = document.getElementById('clear-products');
+                if (clearProductsBtn) {
+                    clearProductsBtn.addEventListener('click', () => {
+                        this.clearData('products');
+                    });
+                }
+
+                const clearSalesBtn = document.getElementById('clear-sales');
+                if (clearSalesBtn) {
+                    clearSalesBtn.addEventListener('click', () => {
+                        this.clearData('salesHistory');
+                    });
+                }
+
+                const clearSalidasBtn = document.getElementById('clear-salidas');
+                if (clearSalidasBtn) {
+                    clearSalidasBtn.addEventListener('click', () => {
+                        this.clearData('salidas');
+                    });
+                }
+
+                const resetAllBtn = document.getElementById('reset-all');
+                if (resetAllBtn) {
+                    resetAllBtn.addEventListener('click', () => {
+                        this.resetAll();
+                    });
+                }
+
+                // Cierre de caja buttons
+                const imprimirCierreBtn = document.getElementById('imprimir-cierre');
+                if (imprimirCierreBtn) {
+                    imprimirCierreBtn.addEventListener('click', () => {
+                        this.imprimirCierre();
+                    });
+                }
+
+                const enviarWhatsappBtn = document.getElementById('enviar-whatsapp');
+                if (enviarWhatsappBtn) {
+                    enviarWhatsappBtn.addEventListener('click', () => {
+                        this.enviarCierreWhatsApp();
+                    });
+                }
+
+                // Drag and drop
+                const dropZone = document.getElementById('file-drop-zone');
+                if (dropZone) {
+                    dropZone.addEventListener('click', () => {
+                        document.getElementById('import-file').click();
+                    });
+
+                    dropZone.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        dropZone.classList.add('drag-over');
+                    });
+
+                    dropZone.addEventListener('dragleave', (e) => {
+                        e.preventDefault();
+                        dropZone.classList.remove('drag-over');
+                    });
+
+                    dropZone.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        dropZone.classList.remove('drag-over');
+                        const files = e.dataTransfer.files;
+                        if (files.length > 0) {
+                            this.handleFile(files[0]);
+                        }
+                    });
+                }
+
+                console.log('Event listeners setup completed');
+            }
+
+            switchModule(module) {
+                // Update navigation
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                const navItem = document.querySelector(`[data-module="${module}"]`);
+                if (navItem) navItem.classList.add('active');
+
+                // Update content
+                document.querySelectorAll('.module').forEach(m => {
+                    m.classList.remove('active');
+                });
+                const moduleEl = document.getElementById(`${module}-module`);
+                if (moduleEl) moduleEl.classList.add('active');
+
+                // Update title
+                const titles = {
+                    ventas: 'Ventas (POS)',
+                    productos: 'Productos',
+                    salidas: 'Gestión de Salidas',
+                    caja: 'Caja',
+                    historial: 'Historial de Ventas',
+                    backup: 'Backup y Restauración'
+                };
+                document.getElementById('module-title').textContent = titles[module];
+
+                this.currentModule = module;
+                this.renderCurrentModule();
+            }
+
+            renderCurrentModule() {
+                switch(this.currentModule) {
+                    case 'ventas':
+                        this.renderProducts();
+                        this.renderCart();
+                        break;
+                    case 'productos':
+                        this.renderProductsTable();
+                        break;
+                    case 'salidas':
+                        this.renderSalidas();
+                        break;
+                    case 'caja':
+                        this.renderCashRegister();
+                        break;
+                    case 'historial':
+                        this.renderSalesHistory();
+                        break;
+                    case 'backup':
+                        this.renderBackup();
+                        break;
+                }
+            }
+
+            renderProducts() {
+                const grid = document.getElementById('products-grid');
+                if (!grid) return;
+
+                const products = JSON.parse(localStorage.getItem('products')) || [];
+
+                if (products.length === 0) {
+                    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">No hay productos disponibles</div>';
+                    return;
+                }
+
+                grid.innerHTML = products.map(product => `
+                    <div class="product-card" onclick="window.pos.addToCart(${product.id})">
+                        <div class="product-image">${product.image || '📦'}</div>
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-price">$${product.price.toLocaleString('es-CO')}</div>
+                        <div class="product-type">
+                            ${product.type === 'preparado' ? '🍳 Preparado' : '📦 Inventario'}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            renderProductsTable() {
+                const tbody = document.getElementById('productos-table');
+                if (!tbody) return;
+
+                const products = JSON.parse(localStorage.getItem('products')) || [];
+                
+                if (products.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #999;">No hay productos registrados</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = products.map(product => `
+                    <tr>
+                        <td>${product.code}</td>
+                        <td>${product.name}</td>
+                        <td>${product.category}</td>
+                        <td>$${product.price.toLocaleString('es-CO')}</td>
+                        <td>${product.type === 'preparado' ? '🍳 Preparado' : '📦 Inventario'}</td>
+                        <td>
+                            <button class="btn-secondary" onclick="window.pos.openProductModal(${product.id})" style="margin-right: 5px;">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-danger" onclick="window.pos.deleteProduct(${product.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            renderCashRegister() {
+                const cashRegister = JSON.parse(localStorage.getItem('cashRegister')) || { isOpen: false, initialBalance: 0, totalSales: 0 };
+                
+                const cerradaDiv = document.getElementById('caja-cerrada');
+                const abiertaDiv = document.getElementById('caja-abierta');
+                const saldoInicialEl = document.getElementById('saldo-inicial');
+                const totalVentasEl = document.getElementById('total-ventas');
+                const salidasCajaEl = document.getElementById('salidas-caja');
+                const saldoEsperadoEl = document.getElementById('saldo-esperado');
+
+                // Calculate today's salidas
+                const today = new Date().toDateString();
+                const salidas = JSON.parse(localStorage.getItem('salidas')) || [];
+                const todaySalidas = salidas.filter(s => new Date(s.timestamp).toDateString() === today)
+                    .reduce((sum, salida) => sum + salida.monto, 0);
+
+                if (!cashRegister.isOpen) {
+                    cerradaDiv.classList.remove('hidden');
+                    abiertaDiv.classList.add('hidden');
+                } else {
+                    cerradaDiv.classList.add('hidden');
+                    abiertaDiv.classList.remove('hidden');
+                    
+                    if (saldoInicialEl) saldoInicialEl.textContent = `$${cashRegister.initialBalance.toLocaleString('es-CO')}`;
+                    if (totalVentasEl) totalVentasEl.textContent = `$${cashRegister.totalSales.toLocaleString('es-CO')}`;
+                    if (salidasCajaEl) salidasCajaEl.textContent = `$${todaySalidas.toLocaleString('es-CO')}`;
+                    if (saldoEsperadoEl) {
+                        const saldoEsperado = cashRegister.initialBalance + cashRegister.totalSales - todaySalidas;
+                        saldoEsperadoEl.textContent = `$${saldoEsperado.toLocaleString('es-CO')}`;
+                    }
+                }
+            }
+
+            renderSalesHistory() {
+                const tbody = document.getElementById('historial-table');
+                if (!tbody) return;
+
+                const sales = JSON.parse(localStorage.getItem('salesHistory')) || [];
+                
+                if (sales.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #999;">No hay ventas registradas</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = sales.slice(-10).reverse().map(sale => {
+                    const date = new Date(sale.date).toLocaleString();
+                    return `
+                        <tr>
+                            <td>${sale.orderId}</td>
+                            <td>${date}</td>
+                            <td>$${sale.total.toLocaleString('es-CO')}</td>
+                            <td>${sale.paymentMethod}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            addToCart(productId) {
+                const products = JSON.parse(localStorage.getItem('products')) || [];
+                const product = products.find(p => p.id === productId);
+                
+                if (!product) return;
+
+                const existingItem = this.cart.find(item => item.id === productId);
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    this.cart.push({ ...product, quantity: 1 });
+                }
+                
+                this.renderCart();
+            }
+
+            renderCart() {
+                const cartItems = document.getElementById('carrito-items');
+                const totalEl = document.getElementById('total');
+                
+                if (!cartItems || !totalEl) return;
+
+                if (this.cart.length === 0) {
+                    cartItems.innerHTML = '<p class="empty-cart">El carrito está vacío</p>';
+                    totalEl.textContent = '$0';
+                    return;
+                }
+
+                cartItems.innerHTML = this.cart.map(item => `
+                    <div class="carrito-item">
+                        <div class="item-info">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-details">$${item.price.toLocaleString('es-CO')} c/u</div>
+                        </div>
+                        <div class="item-actions">
+                            <div class="quantity-controls">
+                                <button class="quantity-btn" onclick="window.pos.updateCartQuantity(${item.id}, -1)">-</button>
+                                <span class="quantity">${item.quantity}</span>
+                                <button class="quantity-btn" onclick="window.pos.updateCartQuantity(${item.id}, 1)">+</button>
+                            </div>
+                            <span class="item-total">$${(item.price * item.quantity).toLocaleString('es-CO')}</span>
+                            <button class="quantity-btn" onclick="window.pos.removeFromCart(${item.id})" style="background: #dc3545; color: white; border-color: #dc3545;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+                const total = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                totalEl.textContent = `$${total.toLocaleString('es-CO')}`;
+            }
+
+            updateCartQuantity(productId, change) {
+                const item = this.cart.find(item => item.id === productId);
+                if (!item) return;
+
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    this.cart = this.cart.filter(item => item.id !== productId);
+                }
+                
+                this.renderCart();
+            }
+
+            removeFromCart(productId) {
+                this.cart = this.cart.filter(item => item.id !== productId);
+                this.renderCart();
+            }
+
+            filterProducts(searchTerm) {
+                const products = JSON.parse(localStorage.getItem('products')) || [];
+                const filtered = products.filter(product => 
+                    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    product.code.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+                
+                const grid = document.getElementById('products-grid');
+                if (!grid) return;
+
+                if (filtered.length === 0) {
+                    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">No se encontraron productos</div>';
+                    return;
+                }
+
+                grid.innerHTML = filtered.map(product => `
+                    <div class="product-card" onclick="window.pos.addToCart(${product.id})">
+                        <div class="product-image">${product.image || '📦'}</div>
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-price">$${product.price.toLocaleString('es-CO')}</div>
+                        <div class="product-type">
+                            ${product.type === 'preparado' ? '🍳 Preparado' : '📦 Inventario'}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            openProductModal(productId = null) {
+                const modal = document.getElementById('producto-modal');
+                const modalTitle = document.getElementById('modal-title');
+                const form = document.getElementById('producto-form');
+                
+                form.reset();
+                this.editingProductId = productId;
+                
+                if (productId) {
+                    const products = JSON.parse(localStorage.getItem('products')) || [];
+                    const product = products.find(p => p.id === productId);
+                    
+                    if (product) {
+                        modalTitle.textContent = 'Editar Producto';
+                        document.getElementById('producto-codigo').value = product.code;
+                        document.getElementById('producto-nombre').value = product.name;
+                        document.getElementById('producto-categoria').value = product.category;
+                        document.getElementById('producto-precio').value = product.price;
+                        document.getElementById('producto-tipo').value = product.type;
+                        document.getElementById('producto-imagen').value = product.image;
+                    }
+                } else {
+                    modalTitle.textContent = 'Agregar Producto';
+                }
+                
+                modal.style.display = 'block';
+            }
+
+            saveProduct() {
+                const products = JSON.parse(localStorage.getItem('products')) || [];
+                
+                const productData = {
+                    code: document.getElementById('producto-codigo').value,
+                    name: document.getElementById('producto-nombre').value,
+                    category: document.getElementById('producto-categoria').value,
+                    price: parseFloat(document.getElementById('producto-precio').value),
+                    type: document.getElementById('producto-tipo').value,
+                    image: document.getElementById('producto-imagen').value || '📦'
+                };
+                
+                if (this.editingProductId) {
+                    const index = products.findIndex(p => p.id === this.editingProductId);
+                    if (index !== -1) {
+                        products[index] = { ...products[index], ...productData };
+                    }
+                } else {
+                    const newProduct = {
+                        ...productData,
+                        id: Date.now()
+                    };
+                    products.push(newProduct);
+                }
+                
+                localStorage.setItem('products', JSON.stringify(products));
+                // Also save to sessionStorage for persistence during session
+                sessionStorage.setItem('products', JSON.stringify(products));
+                
+                this.closeAllModals();
+                this.renderCurrentModule();
+            }
+
+            deleteProduct(productId) {
+                if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) return;
+                
+                const products = JSON.parse(localStorage.getItem('products')) || [];
+                const filtered = products.filter(p => p.id !== productId);
+                localStorage.setItem('products', JSON.stringify(filtered));
+                
+                // Save to sessionStorage as backup
+                sessionStorage.setItem('products', JSON.stringify(filtered));
+                
+                this.renderCurrentModule();
+            }
+
+            // Salidas Module Functions
+            renderSalidas() {
+                this.renderSalidasTable();
+                this.updateSalidasDashboard();
+            }
+
+            renderSalidasTable() {
+                const tbody = document.getElementById('salidas-table');
+                if (!tbody) return;
+
+                const salidas = JSON.parse(localStorage.getItem('salidas')) || [];
+                const today = new Date().toDateString();
+                const todaySalidas = salidas.filter(s => new Date(s.timestamp).toDateString() === today);
+
+                if (todaySalidas.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #999;">No hay salidas registradas hoy</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = todaySalidas.map(salida => `
+                    <tr>
+                        <td>${new Date(salida.timestamp).toLocaleString('es-CO')}</td>
+                        <td>${salida.concepto}</td>
+                        <td>${salida.categoria}</td>
+                        <td>$${salida.monto.toLocaleString('es-CO')}</td>
+                        <td>${salida.metodoPago}</td>
+                        <td>${salida.responsable}</td>
+                        <td>${salida.comprobante ? '✅' : '❌'}</td>
+                        <td>
+                            <button class="btn-danger btn-small" onclick="window.pos.deleteSalida(${salida.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            updateSalidasDashboard() {
+                const today = new Date().toDateString();
+                const sales = JSON.parse(localStorage.getItem('salesHistory')) || [];
+                const salidas = JSON.parse(localStorage.getItem('salidas')) || [];
+
+                // Calculate today's sales
+                const todaySales = sales.filter(s => new Date(s.timestamp).toDateString() === today)
+                    .reduce((sum, sale) => sum + sale.total, 0);
+
+                // Calculate today's salidas
+                const todaySalidas = salidas.filter(s => new Date(s.timestamp).toDateString() === today)
+                    .reduce((sum, salida) => sum + salida.monto, 0);
+
+                // Calculate balance
+                const balance = todaySales - todaySalidas;
+
+                // Update dashboard
+                const ingresosEl = document.getElementById('ingresos-dia');
+                const salidasEl = document.getElementById('salidas-dia');
+                const balanceEl = document.getElementById('balance-dia');
+
+                if (ingresosEl) ingresosEl.textContent = `$${todaySales.toLocaleString('es-CO')}`;
+                if (salidasEl) salidasEl.textContent = `$${todaySalidas.toLocaleString('es-CO')}`;
+                if (balanceEl) {
+                    balanceEl.textContent = `$${balance.toLocaleString('es-CO')}`;
+                    
+                    // Update balance card class based on positive/negative
+                    const balanceCard = document.getElementById('balance-card');
+                    if (balanceCard) {
+                        balanceCard.classList.remove('balance', 'negative');
+                        if (balance < 0) {
+                            balanceCard.classList.add('balance', 'negative');
+                        } else {
+                            balanceCard.classList.add('balance');
+                        }
+                    }
+                }
+            }
+
+            openSalidaModal() {
+                // Create modal dynamically if it doesn't exist
+                let modal = document.getElementById('salida-modal');
+                if (!modal) {
+                    modal = document.createElement('div');
+                    modal.id = 'salida-modal';
+                    modal.className = 'modal';
+                    modal.innerHTML = `
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>Agregar Salida</h3>
+                                <span class="close">&times;</span>
+                            </div>
+                            <form id="salida-form">
+                                <div class="form-group">
+                                    <label for="salida-concepto">Concepto</label>
+                                    <input type="text" id="salida-concepto" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="salida-categoria">Categoría</label>
+                                    <select id="salida-categoria" required>
+                                        <option value="">Seleccionar categoría</option>
+                                        <option value="Compras">Compras</option>
+                                        <option value="Servicios">Servicios</option>
+                                        <option value="Gastos Operativos">Gastos Operativos</option>
+                                        <option value="Otros">Otros</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="salida-monto">Monto</label>
+                                    <input type="number" id="salida-monto" step="1000" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="salida-metodo-pago">Método de Pago</label>
+                                    <select id="salida-metodo-pago" required>
+                                        <option value="Efectivo">Efectivo</option>
+                                        <option value="Transferencia">Transferencia</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="salida-responsable">Responsable</label>
+                                    <input type="text" id="salida-responsable" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="salida-comprobante">¿Tiene Comprobante?</label>
+                                    <select id="salida-comprobante">
+                                        <option value="false">No</option>
+                                        <option value="true">Sí</option>
+                                    </select>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="button" class="btn-secondary cancel-btn">Cancelar</button>
+                                    <button type="submit" class="btn-primary">Guardar</button>
+                                </div>
+                            </form>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+
+                    // Add form submit event
+                    document.getElementById('salida-form').addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.saveSalida();
+                    });
+                }
+
+                modal.style.display = 'block';
+            }
+
+            saveSalida() {
+                const salidas = JSON.parse(localStorage.getItem('salidas')) || [];
+
+                const nuevaSalida = {
+                    id: Date.now(),
+                    timestamp: new Date().toISOString(),
+                    concepto: document.getElementById('salida-concepto').value,
+                    categoria: document.getElementById('salida-categoria').value,
+                    monto: parseInt(document.getElementById('salida-monto').value),
+                    metodoPago: document.getElementById('salida-metodo-pago').value,
+                    responsable: document.getElementById('salida-responsable').value,
+                    comprobante: document.getElementById('salida-comprobante').value === 'true'
+                };
+
+                salidas.push(nuevaSalida);
+                localStorage.setItem('salidas', JSON.stringify(salidas));
+
+                this.closeAllModals();
+                this.renderSalidas();
+                
+                // Also update caja if it's the current module to show updated salidas
+                if (this.currentModule === 'caja') {
+                    this.renderCashRegister();
+                }
+            }
+
+            deleteSalida(salidaId) {
+                if (!confirm('¿Estás seguro de que quieres eliminar esta salida?')) return;
+
+                const salidas = JSON.parse(localStorage.getItem('salidas')) || [];
+                const filtered = salidas.filter(s => s.id !== salidaId);
+                localStorage.setItem('salidas', JSON.stringify(filtered));
+
+                this.renderSalidas();
+                
+                // Also update caja if it's the current module
+                if (this.currentModule === 'caja') {
+                    this.renderCashRegister();
+                }
+            }
+
+            openOpenCashModal() {
+                document.getElementById('abrir-caja-modal').style.display = 'block';
+            }
+
+            openCloseCashModal() {
+                const cashRegister = JSON.parse(localStorage.getItem('cashRegister')) || {};
+                
+                // Calculate today's data
+                const today = new Date().toDateString();
+                const sales = JSON.parse(localStorage.getItem('salesHistory')) || [];
+                const salidas = JSON.parse(localStorage.getItem('salidas')) || [];
+                
+                // Filter today's data
+                const todaySales = sales.filter(s => new Date(s.date).toDateString() === today);
+                const todaySalidas = salidas.filter(s => new Date(s.timestamp).toDateString() === today);
+                
+                // Calculate detailed breakdown
+                const efectivoTotal = todaySales
+                    .filter(sale => sale.paymentMethod === 'Efectivo')
+                    .reduce((sum, sale) => sum + sale.total, 0);
+                    
+                const transferenciasTotal = todaySales
+                    .filter(sale => sale.paymentMethod === 'Transferencia')
+                    .reduce((sum, sale) => sum + sale.total, 0);
+                    
+                const appsTotal = todaySales
+                    .filter(sale => sale.paymentMethod === 'App Domicilios')
+                    .reduce((sum, sale) => sum + sale.total, 0);
+                    
+                const totalGanado = todaySales.reduce((sum, sale) => sum + sale.total, 0);
+                const salidasTotal = todaySalidas.reduce((sum, salida) => sum + salida.monto, 0);
+                const dineroFinal = totalGanado - salidasTotal;
+                const totalSistema = cashRegister.initialBalance + totalGanado - salidasTotal;
+                
+                // Update all display elements
+                document.getElementById('efectivo-total').textContent = `$${efectivoTotal.toLocaleString('es-CO')}`;
+                document.getElementById('transferencias-total').textContent = `$${transferenciasTotal.toLocaleString('es-CO')}`;
+                document.getElementById('apps-total').textContent = `$${appsTotal.toLocaleString('es-CO')}`;
+                document.getElementById('total-ganado').textContent = `$${totalGanado.toLocaleString('es-CO')}`;
+                document.getElementById('salidas-total').textContent = `$${salidasTotal.toLocaleString('es-CO')}`;
+                document.getElementById('dinero-final').textContent = `$${dineroFinal.toLocaleString('es-CO')}`;
+                document.getElementById('total-sistema').textContent = `$${totalSistema.toLocaleString('es-CO')}`;
+                
+                document.getElementById('cerrar-caja-modal').style.display = 'block';
+            }
+
+            openCashRegister() {
+                const initialBalance = parseInt(document.getElementById('caja-saldo-inicial').value);
+                
+                if (isNaN(initialBalance) || initialBalance < 0) {
+                    alert('Ingrese un saldo inicial válido');
+                    return;
+                }
+                
+                const cashRegister = {
+                    isOpen: true,
+                    initialBalance: initialBalance,
+                    totalSales: 0,
+                    openDate: new Date().toISOString()
+                };
+                
+                localStorage.setItem('cashRegister', JSON.stringify(cashRegister));
+                sessionStorage.setItem('cashRegister', JSON.stringify(cashRegister));
+                
+                this.closeAllModals();
+                this.renderCurrentModule();
+            }
+
+            closeCashRegister() {
+                const dineroReal = parseInt(document.getElementById('caja-dinero-real').value);
+                const cashRegister = JSON.parse(localStorage.getItem('cashRegister')) || {};
+                
+                // Calculate today's salidas
+                const today = new Date().toDateString();
+                const salidas = JSON.parse(localStorage.getItem('salidas')) || [];
+                const todaySalidas = salidas.filter(s => new Date(s.timestamp).toDateString() === today)
+                    .reduce((sum, salida) => sum + salida.monto, 0);
+                
+                const totalSistema = cashRegister.initialBalance + cashRegister.totalSales - todaySalidas;
+                const diferencia = dineroReal - totalSistema;
+                
+                const diferenciaRow = document.getElementById('diferencia-row');
+                const diferenciaEl = document.getElementById('diferencia');
+                
+                diferenciaRow.classList.remove('positive', 'negative');
+                if (diferencia > 0) {
+                    diferenciaRow.classList.add('positive');
+                    diferenciaEl.textContent = `+$${Math.abs(diferencia).toLocaleString('es-CO')} (Sobrante)`;
+                } else if (diferencia < 0) {
+                    diferenciaRow.classList.add('negative');
+                    diferenciaEl.textContent = `-$${Math.abs(diferencia).toLocaleString('es-CO')} (Faltante)`;
+                } else {
+                    diferenciaEl.textContent = `$0 (Exacto)`;
+                }
+                
+                const diferenciaTexto = diferencia >= 0 ? 
+                    `+$${Math.abs(diferencia).toLocaleString('es-CO')} (Sobrante)` : 
+                    `-$${Math.abs(diferencia).toLocaleString('es-CO')} (Faltante)`;
+                if (confirm(`¿Confirmar cierre de caja?\nDiferencia: ${diferenciaTexto}`)) {
+                    cashRegister.isOpen = false;
+                    cashRegister.closeDate = new Date().toISOString();
+                    cashRegister.difference = diferencia;
+                    
+                    localStorage.setItem('cashRegister', JSON.stringify(cashRegister));
+                    sessionStorage.setItem('cashRegister', JSON.stringify(cashRegister));
+                    
+                    this.closeAllModals();
+                    this.renderCurrentModule();
+                }
+            }
+
+            updateCloseCashModal() {
+                const dineroReal = parseInt(document.getElementById('caja-dinero-real').value) || 0;
+                const cashRegister = JSON.parse(localStorage.getItem('cashRegister')) || {};
+                const totalSistema = cashRegister.initialBalance + cashRegister.totalSales;
+                const diferencia = dineroReal - totalSistema;
+                
+                document.getElementById('dinero-real-input').textContent = `$${dineroReal.toLocaleString('es-CO')}`;
+                
+                const diferenciaRow = document.getElementById('diferencia-row');
+                const diferenciaEl = document.getElementById('diferencia');
+                
+                diferenciaRow.classList.remove('positive', 'negative');
+                if (diferencia > 0) {
+                    diferenciaRow.classList.add('positive');
+                    diferenciaEl.textContent = `+$${Math.abs(diferencia).toLocaleString('es-CO')} (Sobrante)`;
+                } else if (diferencia < 0) {
+                    diferenciaRow.classList.add('negative');
+                    diferenciaEl.textContent = `-$${Math.abs(diferencia).toLocaleString('es-CO')} (Faltante)`;
+                } else {
+                    diferenciaEl.textContent = `$0 (Exacto)`;
+                }
+            }
+
+            openFinalizeSaleModal() {
+                console.log('Opening finalize sale modal...');
+                if (this.cart.length === 0) {
+                    alert('El carrito está vacío');
+                    return;
+                }
+                
+                const cashRegister = JSON.parse(localStorage.getItem('cashRegister')) || {};
+                if (!cashRegister.isOpen) {
+                    alert('La caja está cerrada. Debe abrir la caja antes de realizar ventas.');
+                    return;
+                }
+                
+                const total = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                
+                document.getElementById('venta-subtotal').textContent = `$${total.toLocaleString('es-CO')}`;
+                document.getElementById('venta-total').textContent = `$${total.toLocaleString('es-CO')}`;
+                
+                document.getElementById('finalizar-venta-modal').style.display = 'block';
+                console.log('Finalize sale modal opened');
+            }
+
+            toggleMontoRecibido(metodoPago) {
+                const montoRecibidoGroup = document.getElementById('monto-recibido-group');
+                const cambioGroup = document.getElementById('cambio-group');
+                
+                if (metodoPago === 'Efectivo') {
+                    montoRecibidoGroup.style.display = 'block';
+                } else {
+                    montoRecibidoGroup.style.display = 'none';
+                    cambioGroup.style.display = 'none';
+                }
+            }
+
+            calculateChange() {
+                const metodoPago = document.getElementById('metodo-pago').value;
+                if (metodoPago !== 'Efectivo') return;
+                
+                const montoRecibido = parseInt(document.getElementById('monto-recibido').value) || 0;
+                const total = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                
+                const cambio = montoRecibido - total;
+                const cambioGroup = document.getElementById('cambio-group');
+                const cambioEl = document.getElementById('cambio');
+                
+                if (montoRecibido >= total) {
+                    cambioGroup.style.display = 'block';
+                    cambioEl.textContent = `$${cambio.toLocaleString('es-CO')}`;
+                } else {
+                    cambioGroup.style.display = 'none';
+                }
+            }
+
+            finalizeSale() {
+                const metodoPago = document.getElementById('metodo-pago').value;
+                const total = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                
+                if (metodoPago === 'Efectivo') {
+                    const montoRecibido = parseInt(document.getElementById('monto-recibido').value) || 0;
+                    if (montoRecibido < total) {
+                        alert('El monto recibido es insuficiente');
+                        return;
+                    }
+                }
+                
+                // Update cash register
+                const cashRegister = JSON.parse(localStorage.getItem('cashRegister')) || {};
+                cashRegister.totalSales += total;
+                localStorage.setItem('cashRegister', JSON.stringify(cashRegister));
+                sessionStorage.setItem('cashRegister', JSON.stringify(cashRegister));
+                
+                // Add to sales history
+                const salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
+                const sale = {
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    items: [...this.cart],
+                    total: total,
+                    paymentMethod: metodoPago,
+                    orderId: `ORD-${Date.now()}`
+                };
+                salesHistory.push(sale);
+                localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
+                sessionStorage.setItem('salesHistory', JSON.stringify(salesHistory));
+                
+                // Clear cart and close modal
+                this.cart = [];
+                sessionStorage.setItem('cart', JSON.stringify([]));
+                
+                this.closeAllModals();
+                this.renderCurrentModule();
+                
+                alert('Venta realizada con éxito');
+            }
+
+            updateDateTime() {
+                const updateDateTime = () => {
+                    const now = new Date();
+                    document.getElementById('datetime').textContent = now.toLocaleString();
+                };
+                updateDateTime();
+                setInterval(updateDateTime, 1000);
+            }
+
+            closeAllModals() {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.style.display = 'none';
+                });
+                document.querySelectorAll('form').forEach(form => {
+                    form.reset();
+                });
+            }
+
+            renderBackup() {
+                this.updateBackupInfo();
+            }
+
+            updateBackupInfo() {
+                const products = JSON.parse(sessionStorage.getItem('products') || '[]');
+                const sales = JSON.parse(sessionStorage.getItem('salesHistory') || '[]');
+                const cashRegister = JSON.parse(sessionStorage.getItem('cashRegister') || '{}');
+                
+                document.getElementById('backup-products-count').textContent = products.length;
+                document.getElementById('backup-sales-count').textContent = sales.length;
+                document.getElementById('backup-cash-status').textContent = cashRegister.isOpen ? 'Abierta' : 'Cerrada';
+            }
+
+            exportFullBackup() {
+                const backup = {
+                    timestamp: new Date().toISOString(),
+                    version: '1.0',
+                    type: 'full_backup',
+                    info: {
+                        backupDate: new Date().toISOString(),
+                        backupBy: 'Sistema POS',
+                        description: 'Backup completo del sistema POS incluyendo productos, ventas, caja y configuración'
+                    },
+                    data: {
+                        products: JSON.parse(sessionStorage.getItem('products') || '[]'),
+                        salesHistory: JSON.parse(sessionStorage.getItem('salesHistory') || '[]'),
+                        cashRegister: JSON.parse(sessionStorage.getItem('cashRegister') || '{}'),
+                        salidas: JSON.parse(localStorage.getItem('salidas') || '[]'),
+                        cart: JSON.parse(sessionStorage.getItem('cart') || '[]')
+                    },
+                    defaultData: {
+                        // Include default products for recovery
+                        defaultProducts: [
+                            { id: 1, code: '001', name: 'Cono de 1 bola', category: 'Helados', price: 4000, type: 'preparado', image: '🍦' },
+                            { id: 2, code: '002', name: 'Cono de 2 bolas', category: 'Helados', price: 7000, type: 'preparado', image: '🍦' },
+                            { id: 3, code: '003', name: 'Bola adicional', category: 'Helados', price: 3500, type: 'preparado', image: '🍨' },
+                            { id: 4, code: '004', name: 'Cucurucho 1 bola + salsa', category: 'Helados', price: 5000, type: 'preparado', image: '🍧' },
+                            { id: 5, code: '005', name: 'Cucurucho 2 bolas + salsa', category: 'Helados', price: 8000, type: 'preparado', image: '🍧' },
+                            { id: 6, code: '006', name: 'Cucurucho 3 bolas + salsa', category: 'Helados', price: 10000, type: 'preparado', image: '🍧' },
+                            { id: 7, code: '007', name: 'Concha de 2 bolas', category: 'Helados', price: 12000, type: 'preparado', image: '🥐' },
+                            { id: 8, code: '008', name: 'Concha de 3 bolas', category: 'Helados', price: 14000, type: 'preparado', image: '🥐' },
+                            { id: 9, code: '009', name: 'Concha de 4 bolas', category: 'Helados', price: 17000, type: 'preparado', image: '🥐' },
+                            { id: 10, code: '010', name: 'Helado con queso', category: 'Helados', price: 11000, type: 'preparado', image: '🧀' },
+                            { id: 11, code: '011', name: 'Salpicón 8oz', category: 'Bebidas', price: 6000, type: 'preparado', image: '🥤' },
+                            { id: 12, code: '012', name: 'Salpicón 12oz', category: 'Bebidas', price: 7000, type: 'preparado', image: '🥤' },
+                            { id: 13, code: '013', name: 'Salpicón con helado 12oz', category: 'Bebidas', price: 9000, type: 'preparado', image: '🥤' },
+                            { id: 14, code: '014', name: 'Salpicón con helado 16oz', category: 'Bebidas', price: 12000, type: 'preparado', image: '🥤' },
+                            { id: 15, code: '015', name: 'Banana split', category: 'Postres', price: 17500, type: 'preparado', image: '🍌' },
+                            { id: 16, code: '016', name: 'Ensalada de frutas pequeña sencilla', category: 'Postres', price: 12000, type: 'preparado', image: '🍓' },
+                            { id: 17, code: '017', name: 'Ensalada grande sencilla', category: 'Postres', price: 14500, type: 'preparado', image: '🥗' },
+                            { id: 18, code: '018', name: 'Ensalada pequeña especial', category: 'Postres', price: 16000, type: 'preparado', image: '🥗' },
+                            { id: 19, code: '019', name: 'Ensalada grande especial', category: 'Postres', price: 18000, type: 'preparado', image: '🥗' },
+                            { id: 20, code: '020', name: 'Obleas', category: 'Postres', price: 7500, type: 'preparado', image: '🍪' },
+                            { id: 21, code: '021', name: 'Malteada sencilla', category: 'Bebidas', price: 14000, type: 'preparado', image: '🥤' },
+                            { id: 22, code: '022', name: 'Malteada especial', category: 'Bebidas', price: 17000, type: 'preparado', image: '🥤' },
+                            { id: 23, code: '023', name: 'Jugo en agua', category: 'Bebidas', price: 5500, type: 'preparado', image: '🧃' },
+                            { id: 24, code: '024', name: 'Jugo en leche', category: 'Bebidas', price: 7500, type: 'preparado', image: '🥛' },
+                            { id: 25, code: '025', name: 'Sodas saborizadas', category: 'Bebidas', price: 11000, type: 'preparado', image: '🧋' },
+                            { id: 26, code: '026', name: 'Limonada', category: 'Bebidas', price: 10000, type: 'preparado', image: '🍋' },
+                            { id: 27, code: '027', name: 'Café granizado', category: 'Bebidas', price: 9500, type: 'preparado', image: '☕' },
+                            { id: 28, code: '028', name: 'Afogatto', category: 'Bebidas', price: 7000, type: 'preparado', image: '☕' },
+                            { id: 29, code: '029', name: 'Fresas con crema 8oz', category: 'Postres', price: 9000, type: 'preparado', image: '🍓' },
+                            { id: 30, code: '030', name: 'Fresas con crema 12oz', category: 'Postres', price: 13000, type: 'preparado', image: '🍓' },
+                            { id: 31, code: '031', name: 'Fresas con crema 16oz', category: 'Postres', price: 16000, type: 'preparado', image: '🍓' },
+                            { id: 32, code: '032', name: 'Agua 250ml', category: 'Bebidas', price: 2000, type: 'inventario', image: '💧' },
+                            { id: 33, code: '033', name: 'Gaseosa 250ml', category: 'Bebidas', price: 2800, type: 'inventario', image: '🥤' },
+                            { id: 34, code: '034', name: 'Soda 350ml', category: 'Bebidas', price: 2800, type: 'inventario', image: '🍾' },
+                            { id: 35, code: '035', name: 'Wafle salado doble porción de queso', category: 'Postres', price: 17000, type: 'preparado', image: '🧇' },
+                            { id: 36, code: '036', name: 'Wafle fresa y crema de avellanas', category: 'Postres', price: 19000, type: 'preparado', image: '🧇' },
+                            { id: 37, code: '037', name: 'Wafle banano y arequipe', category: 'Postres', price: 17000, type: 'preparado', image: '🧇' },
+                            { id: 38, code: '038', name: 'Wafle frutas', category: 'Postres', price: 19000, type: 'preparado', image: '🧇' },
+                            { id: 39, code: '039', name: 'Wafle doble queso con arequipe', category: 'Postres', price: 19000, type: 'preparado', image: '🧇' },
+                            { id: 40, code: '040', name: 'Wafle Valeria', category: 'Postres', price: 19000, type: 'preparado', image: '🧇' },
+                            { id: 41, code: '041', name: 'Wafle amor', category: 'Postres', price: 15500, type: 'preparado', image: '❤️' },
+                            { id: 42, code: '042', name: 'Waffles personajes', category: 'Postres', price: 15500, type: 'preparado', image: '🎭' },
+                            { id: 43, code: '043', name: 'Waffles infantiles', category: 'Postres', price: 13500, type: 'preparado', image: '🎈' },
+                            { id: 44, code: '044', name: 'Helados infantiles', category: 'Helados', price: 10000, type: 'preparado', image: '🍦' },
+                            { id: 45, code: '045', name: 'Gusanito infantil', category: 'Postres', price: 12000, type: 'preparado', image: '🐛' },
+                            { id: 46, code: '046', name: 'Copas especiales', category: 'Postres', price: 17000, type: 'preparado', image: '🍧' },
+                            { id: 47, code: '047', name: 'Copa banano fresa', category: 'Postres', price: 17500, type: 'preparado', image: '🍌' },
+                            { id: 48, code: '048', name: 'Copa frutos rojos', category: 'Postres', price: 17500, type: 'preparado', image: '🍓' },
+                            { id: 49, code: '049', name: 'Copa fresa y crema de chocolate', category: 'Postres', price: 17500, type: 'preparado', image: '🍓' },
+                            { id: 50, code: '050', name: 'Copa pasión de chocolate', category: 'Postres', price: 18000, type: 'preparado', image: '🍫' }
+                        ]
+                    }
+                };
+                
+                const filename = `pos-backup-${new Date().toISOString().split('T')[0]}.json`;
+                this.downloadJSON(backup, filename);
+                alert('Backup completo exportado con éxito\n\nIncluye:\n• Todos los productos actuales\n• Historial de ventas\n• Estado de caja\n• Carrito activo\n• Productos iniciales por defecto');
+            }
+
+            exportProducts() {
+                const products = JSON.parse(sessionStorage.getItem('products') || '[]');
+                const backup = {
+                    timestamp: new Date().toISOString(),
+                    version: '1.0',
+                    type: 'products_only',
+                    info: {
+                        exportDate: new Date().toISOString(),
+                        exportBy: 'Sistema POS',
+                        description: 'Exportación del catálogo de productos del sistema POS'
+                    },
+                    data: {
+                        products: products,
+                        currentCount: products.length
+                    }
+                };
+                
+                const filename = `productos-${new Date().toISOString().split('T')[0]}.json`;
+                this.downloadJSON(backup, filename);
+                alert(`Productos exportados con éxito\n\n${products.length} productos exportados:\n• Helados: ${products.filter(p => p.category === 'Helados').length}\n• Bebidas: ${products.filter(p => p.category === 'Bebidas').length}\n• Postres: ${products.filter(p => p.category === 'Postres').length}`);
+            }
+
+            downloadJSON(data, filename) {
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            handleFileImport(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    this.handleFile(file);
+                }
+            }
+
+            handleFile(file) {
+                if (!file.name.endsWith('.json')) {
+                    alert('Por favor selecciona un archivo JSON válido');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const content = e.target.result;
+                        const backup = JSON.parse(content);
+                        this.previewImport(backup);
+                    } catch (error) {
+                        alert('Error al leer el archivo JSON: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            previewImport(backup) {
+                const preview = document.getElementById('import-preview');
+                const previewContent = document.getElementById('preview-content');
+                
+                let html = '';
+                
+                // Backup info
+                if (backup.timestamp) {
+                    const date = new Date(backup.timestamp).toLocaleString();
+                    html += `<div class="preview-section">
+                        <strong>📅 Fecha Backup:</strong> ${date}
+                    </div>`;
+                }
+                
+                if (backup.version) {
+                    html += `<div class="preview-section">
+                        <strong>🔢 Versión:</strong> ${backup.version}
+                    </div>`;
+                }
+                
+                if (backup.type) {
+                    const typeText = backup.type === 'products_only' ? 'Solo productos' : 'Backup completo';
+                    html += `<div class="preview-section">
+                        <strong>📋 Tipo:</strong> ${typeText}
+                    </div>`;
+                }
+                
+                // Data preview
+                if (backup.data && backup.data.products) {
+                    const products = backup.data.products;
+                    html += `<div class="preview-section">
+                        <strong>📦 Productos:</strong> ${products.length} items
+                    </div>`;
+                    
+                    // Category breakdown
+                    const helados = products.filter(p => p.category === 'Helados').length;
+                    const bebidas = products.filter(p => p.category === 'Bebidas').length;
+                    const postres = products.filter(p => p.category === 'Postres').length;
+                    
+                    html += `<div class="preview-section" style="margin-left: 20px;">
+                        <small>• Helados: ${helados}</small><br>
+                        <small>• Bebidas: ${bebidas}</small><br>
+                        <small>• Postres: ${postres}</small>
+                    </div>`;
+                }
+                
+                if (backup.data && backup.data.salesHistory) {
+                    html += `<div class="preview-section">
+                        <strong>💰 Ventas:</strong> ${backup.data.salesHistory.length} ventas
+                    </div>`;
+                    
+                    if (backup.data.salesHistory.length > 0) {
+                        const totalVentas = backup.data.salesHistory.reduce((sum, sale) => sum + (sale.total || 0), 0);
+                        html += `<div class="preview-section" style="margin-left: 20px;">
+                            <small>• Total ventas: $${totalVentas.toLocaleString('es-CO')}</small>
+                        </div>`;
+                    }
+                }
+                
+                if (backup.data && backup.data.cashRegister) {
+                    const caja = backup.data.cashRegister;
+                    html += `<div class="preview-section">
+                        <strong>🏦 Caja:</strong> ${caja.isOpen ? 'Abierta' : 'Cerrada'}
+                    </div>`;
+                    
+                    if (caja.isOpen && caja.initialBalance !== undefined) {
+                        html += `<div class="preview-section" style="margin-left: 20px;">
+                            <small>• Saldo inicial: $${caja.initialBalance.toLocaleString('es-CO')}</small><br>
+                            <small>• Total ventas: $${caja.totalSales.toLocaleString('es-CO')}</small>
+                        </div>`;
+                    }
+                }
+                
+                if (backup.data && backup.data.salidas) {
+                    html += `<div class="preview-section">
+                        <strong>💸 Salidas:</strong> ${backup.data.salidas.length} registradas
+                    </div>`;
+                    
+                    if (backup.data.salidas.length > 0) {
+                        const totalSalidas = backup.data.salidas.reduce((sum, salida) => sum + (salida.monto || 0), 0);
+                        html += `<div class="preview-section" style="margin-left: 20px;">
+                            <small>• Total salidas: $${totalSalidas.toLocaleString('es-CO')}</small>
+                        </div>`;
+                    }
+                }
+                
+                if (backup.data && backup.data.cart) {
+                    html += `<div class="preview-section">
+                        <strong>🛒 Carrito:</strong> ${backup.data.cart.length} items
+                    </div>`;
+                }
+                
+                // Check for default products
+                if (backup.defaultData && backup.defaultData.defaultProducts) {
+                    html += `<div class="preview-section">
+                        <strong>🎯 Productos Iniciales:</strong> ${backup.defaultData.defaultProducts.length} productos por defecto
+                    </div>`;
+                }
+                
+                previewContent.innerHTML = html;
+                preview.style.display = 'block';
+                
+                // Store backup data temporarily
+                this.tempBackupData = backup;
+            }
+
+            confirmImport() {
+                if (!this.tempBackupData) {
+                    alert('No hay datos para importar');
+                    return;
+                }
+
+                let confirmMessage = '¿Estás seguro de que quieres importar estos datos?\n\n';
+                confirmMessage += 'Esto reemplazará todos los datos actuales.\n\n';
+                
+                if (this.tempBackupData.type === 'products_only') {
+                    const products = this.tempBackupData.data?.products || [];
+                    confirmMessage += `Se importarán ${products.length} productos.`;
+                } else {
+                    confirmMessage += 'Se importará todo el backup:\n';
+                    confirmMessage += '• Productos\n';
+                    confirmMessage += '• Historial de ventas\n';
+                    confirmMessage += '• Estado de caja\n';
+                    confirmMessage += '• Salidas registradas\n';
+                    confirmMessage += '• Carrito activo';
+                }
+
+                if (!confirm(confirmMessage)) {
+                    return;
+                }
+
+                try {
+                    if (this.tempBackupData.data) {
+                        const data = this.tempBackupData.data;
+                        
+                        // Import main data
+                        if (data.products) {
+                            localStorage.setItem('products', JSON.stringify(data.products));
+                            sessionStorage.setItem('products', JSON.stringify(data.products));
+                        }
+                        
+                        if (data.salesHistory) {
+                            localStorage.setItem('salesHistory', JSON.stringify(data.salesHistory));
+                            sessionStorage.setItem('salesHistory', JSON.stringify(data.salesHistory));
+                        }
+                        
+                        if (data.cashRegister) {
+                            localStorage.setItem('cashRegister', JSON.stringify(data.cashRegister));
+                            sessionStorage.setItem('cashRegister', JSON.stringify(data.cashRegister));
+                        }
+                        
+                        if (data.salidas) {
+                            localStorage.setItem('salidas', JSON.stringify(data.salidas));
+                        }
+                        
+                        if (data.cart) {
+                            sessionStorage.setItem('cart', JSON.stringify(data.cart));
+                            this.cart = data.cart;
+                        }
+                    }
+                    
+                    // Import default products for recovery
+                    if (this.tempBackupData.defaultData && this.tempBackupData.defaultData.defaultProducts) {
+                        localStorage.setItem('defaultProducts', JSON.stringify(this.tempBackupData.defaultData.defaultProducts));
+                        sessionStorage.setItem('defaultProducts', JSON.stringify(this.tempBackupData.defaultData.defaultProducts));
+                    }
+                    
+                    alert('Datos importados con éxito\n\nEl sistema se actualizó con la información importada.');
+                    this.cancelImport();
+                    this.renderCurrentModule();
+                } catch (error) {
+                    alert('Error al importar datos: ' + error.message);
+                }
+            }
+
+            cancelImport() {
+                document.getElementById('import-preview').style.display = 'none';
+                document.getElementById('import-file').value = '';
+                this.tempBackupData = null;
+            }
+
+            clearData(type) {
+                const messages = {
+                    products: '¿Estás seguro de que quieres limpiar todos los productos?',
+                    salesHistory: '¿Estás seguro de que quieres limpiar todo el historial de ventas?',
+                    salidas: '¿Estás seguro de que quieres limpiar todas las salidas registradas?'
+                };
+                
+                if (!confirm(messages[type])) return;
+                
+                // Clear from both storages
+                localStorage.removeItem(type);
+                sessionStorage.removeItem(type);
+                
+                alert('Datos limpiados con éxito');
+                this.renderCurrentModule();
+            }
+
+            resetAll() {
+                if (!confirm('¿Estás seguro de que quieres restablecer TODO? Se perderán todos los datos actuales.')) {
+                    return;
+                }
+                
+                // Clear all storages
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Reset cart
+                this.cart = [];
+                
+                alert('Sistema restablecido completamente');
+                
+                // Reload page to reinitialize with fresh data
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            }
+
+            // Cierre de Caja Functions
+            imprimirCierre() {
+                const cierreData = this.generarReporteCierre();
+                
+                // Create a new window for printing
+                const printWindow = window.open('', '_blank', 'width=800,height=600');
+                printWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>Reporte de Cierre</title>
+                            <style>
+                                body { font-family: Arial; padding: 20px; }
+                                h2 { color: #333; text-align: center; }
+                                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                                th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+                                th { background: #f4f4f4; font-weight: bold; }
+                                .total { font-weight: bold; background: #f8f9fa; }
+                                .income { color: #28a745; }
+                                .expense { color: #dc3545; }
+                                .final { color: #856404; font-weight: bold; }
+                            </style>
+                        </head>
+                        <body>
+                            <h2>📊 REPORTE DE CIERRE DE CAJA</h2>
+                            <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-CO')}</p>
+                            <hr>
+                            ${cierreData}
+                        </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                printWindow.print();
+            }
+
+            enviarCierreWhatsApp() {
+                try {
+                    const cierreData = this.generarReporteCierre();
+                    const phoneNumber = '573024504546'; // Número de WhatsApp proporcionado
+                    
+                    const message = `📊 *REPORTE DE CIERRE DE CAJA* 📅
+Fecha: ${new Date().toLocaleString('es-CO')}
+
+${cierreData.replace(/<[^>]*>/g, '').replace(/\n/g, '\n')}
+
+*Enviado desde Sistema POS Heladería*`;
+                    
+                    // Codificar el mensaje para WhatsApp
+                    const encodedMessage = encodeURIComponent(message);
+                    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+                    
+                    // Abrir WhatsApp en nueva ventana
+                    window.open(whatsappUrl, '_blank');
+                    
+                    alert('✅ Reporte enviado a WhatsApp exitosamente');
+                } catch (error) {
+                    alert('❌ Error al enviar a WhatsApp: ' + error.message);
+                }
+            }
+
+            generarReporteCierre() {
+                const today = new Date().toDateString();
+                const sales = JSON.parse(localStorage.getItem('salesHistory')) || [];
+                const salidas = JSON.parse(localStorage.getItem('salidas')) || [];
+                
+                // Filter today's data
+                const todaySales = sales.filter(s => new Date(s.date).toDateString() === today);
+                const todaySalidas = salidas.filter(s => new Date(s.timestamp).toDateString() === today);
+                
+                // Calculate breakdown
+                const efectivoTotal = todaySales
+                    .filter(sale => sale.paymentMethod === 'Efectivo')
+                    .reduce((sum, sale) => sum + sale.total, 0);
+                    
+                const transferenciasTotal = todaySales
+                    .filter(sale => sale.paymentMethod === 'Transferencia')
+                    .reduce((sum, sale) => sum + sale.total, 0);
+                    
+                const appsTotal = todaySales
+                    .filter(sale => sale.paymentMethod === 'App Domicilios')
+                    .reduce((sum, sale) => sum + sale.total, 0);
+                    
+                const totalGanado = todaySales.reduce((sum, sale) => sum + sale.total, 0);
+                const salidasTotal = todaySalidas.reduce((sum, salida) => sum + salida.monto, 0);
+                const dineroFinal = totalGanado - salidasTotal;
+                
+                return `
+<b>💰 RESUMEN DEL DÍA</b>
+
+<b>💵 Ingresos:</b>
+• Dinero en Efectivo: <span class="income">$${efectivoTotal.toLocaleString('es-CO')}</span>
+• Dinero en Transferencias: <span class="income">$${transferenciasTotal.toLocaleString('es-CO')}</span>
+• Dinero en Apps: <span class="income">$${appsTotal.toLocaleString('es-CO')}</span>
+• <b>Total Ganado:</b> <span class="income">$${totalGanado.toLocaleString('es-CO')}</span>
+
+<b>💸 Deducciones:</b>
+• Dinero en Salidas: <span class="expense">$${salidasTotal.toLocaleString('es-CO')}</span>
+• <b>💰 Dinero Final:</b> <span class="final">$${dineroFinal.toLocaleString('es-CO')}</span>
+
+<b>📋 VENTAS DEL DÍA (${todaySales.length} ventas):</b>
+${todaySales.map(sale => `• ${sale.orderId} - $${sale.total.toLocaleString('es-CO')} (${sale.paymentMethod})`).join('\n')}
+
+<b>📋 SALIDAS DEL DÍA (${todaySalidas.length} salidas):</b>
+${todaySalidas.map(salida => `• ${salida.concepto} - $${salida.monto.toLocaleString('es-CO')} (${salida.responsable})`).join('\n')}
+                `;
+            }
+        }
+
+        // Initialize the POS system when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, initializing POS...');
+            window.pos = new POSSystem();
+        });
+    </script>
+</body>
+</html>

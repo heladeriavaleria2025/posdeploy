@@ -1,0 +1,26 @@
+{
+  "name": "pos-heladeria",
+  "version": "1.0.0",
+  "description": "Sistema POS para Heladería con backend MongoDB",
+  "main": "pos-mongodb.js",
+  "scripts": {
+    "start": "node pos-mongodb.js",
+    "dev": "node pos-mongodb.js --watch"
+  },
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "mongodb": "^4.17.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "keywords": [
+    "pos",
+    "heladeria",
+    "mongodb",
+    "sistema",
+    "venta"
+  ],
+  "author": "Sistema POS Heladería",
+  "license": "MIT"
+}

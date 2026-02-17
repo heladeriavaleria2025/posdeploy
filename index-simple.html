@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema POS - Punto de Venta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Debug Console -->
+    <div id="debug-console" style="position: fixed; top: 10px; right: 10px; background: #333; color: #0f0; padding: 10px; font-family: monospace; font-size: 12px; z-index: 10000; max-width: 300px; border-radius: 5px;">
+        <div id="debug-log"></div>
+        <button onclick="clearDebug()" style="margin-top: 10px; background: #666; color: white; border: none; padding: 5px; cursor: pointer;">Limpiar</button>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-cash-register"></i> Sistema POS</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li>
+                    <a href="#" class="nav-item active" data-module="ventas">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Ventas (POS)</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-item" data-module="productos">
+                        <i class="fas fa-box"></i>
+                        <span>Productos</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-item" data-module="caja">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Caja</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-item" data-module="historial">
+                        <i class="fas fa-history"></i>
+                        <span>Historial de Ventas</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-title">
+                <h1 id="module-title">Ventas (POS)</h1>
+            </div>
+            <div class="header-info">
+                <span id="datetime"></span>
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Administrador</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Module Content -->
+        <div class="content">
+            <!-- Ventas Module -->
+            <div id="ventas-module" class="module active">
+                <div class="ventas-container">
+                    <div class="productos-section">
+                        <div class="search-bar">
+                            <input type="text" id="search-product" placeholder="Buscar producto...">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="products-grid" id="products-grid">
+                            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
+                                Cargando productos...
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carrito-section">
+                        <div class="carrito-header">
+                            <h3><i class="fas fa-shopping-basket"></i> Carrito de Compras</h3>
+                        </div>
+                        <div class="carrito-items" id="carrito-items">
+                            <p class="empty-cart">El carrito está vacío</p>
+                        </div>
+                        <div class="carrito-summary">
+                            <div class="summary-row">
+                                <span>Total:</span>
+                                <span id="total">$0</span>
+                            </div>
+                        </div>
+                        <button class="btn-primary btn-full" id="finalizar-venta">
+                            <i class="fas fa-credit-card"></i> Finalizar Venta
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Productos Module -->
+            <div id="productos-module" class="module">
+                <div class="module-header">
+                    <h2>Productos</h2>
+                    <button class="btn-primary" id="agregar-producto">
+                        <i class="fas fa-plus"></i> Agregar Producto
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Precio</th>
+                                <th>Tipo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productos-table">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px; color: #999;">
+                                    Cargando productos...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Caja Module -->
+            <div id="caja-module" class="module">
+                <div id="caja-cerrada" class="caja-state">
+                    <div class="caja-message">
+                        <i class="fas fa-lock"></i>
+                        <h2>Caja Cerrada</h2>
+                        <p>La caja está actualmente cerrada</p>
+                        <button class="btn-primary btn-large" id="abrir-caja">
+                            <i class="fas fa-unlock"></i> ABRIR CAJA
+                        </button>
+                    </div>
+                </div>
+                <div id="caja-abierta" class="caja-state hidden">
+                    <div class="caja-dashboard">
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <h3>Saldo Inicial</h3>
+                            </div>
+                            <div class="card-value" id="saldo-inicial">$0</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <i class="fas fa-chart-line"></i>
+                                <h3>Total Ventas</h3>
+                            </div>
+                            <div class="card-value" id="total-ventas">$0</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <i class="fas fa-calculator"></i>
+                                <h3>Saldo Esperado</h3>
+                            </div>
+                            <div class="card-value" id="saldo-esperado">$0</div>
+                        </div>
+                    </div>
+                    <div class="caja-actions">
+                        <button class="btn-danger" id="cerrar-caja">
+                            <i class="fas fa-lock"></i> CERRAR CAJA
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial Module -->
+            <div id="historial-module" class="module">
+                <div class="module-header">
+                    <h2>Historial de Ventas</h2>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID Orden</th>
+                                <th>Fecha</th>
+                                <th>Total</th>
+                                <th>Método Pago</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historial-table">
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 40px; color: #999;">
+                                    No hay ventas registradas
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Script -->
+    <script>
+        // Debug function
+        function debug(message) {
+            const debugLog = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.innerHTML += `[${timestamp}] ${message}<br>`;
+            console.log(message);
+        }
+
+        function clearDebug() {
+            document.getElementById('debug-log').innerHTML = '';
+        }
+
+        // Simple POS System
+        class SimplePOS {
+            constructor() {
+                debug('Iniciando SimplePOS...');
+                this.currentModule = 'ventas';
+                this.cart = [];
+                this.init();
+            }
+
+            init() {
+                debug('Inicializando sistema...');
+                this.initializeData();
+                this.setupEventListeners();
+                this.updateDateTime();
+                this.switchModule('ventas');
+                debug('Sistema inicializado');
+            }
+
+            initializeData() {
+                debug('Inicializando datos...');
+                if (!localStorage.getItem('products')) {
+                    const products = [
+                        { id: 1, code: '001', name: 'Helado de Vainilla', category: 'Helados', price: 25000, type: 'preparado', image: '🍦' },
+                        { id: 2, code: '002', name: 'Helado de Chocolate', category: 'Helados', price: 25000, type: 'preparado', image: '🍫' },
+                        { id: 3, code: '003', name: 'Malteada de Fresa', category: 'Bebidas', price: 35000, type: 'preparado', image: '🥤' },
+                        { id: 4, code: '004', name: 'Cono de Helado', category: 'Helados', price: 15000, type: 'preparado', image: '🍨' },
+                        { id: 5, code: '005', name: 'Refresco Cola', category: 'Bebidas', price: 12000, type: 'inventario', image: '🥤' },
+                    ];
+                    localStorage.setItem('products', JSON.stringify(products));
+                    debug(`Creados ${products.length} productos iniciales`);
+                }
+
+                if (!localStorage.getItem('cashRegister')) {
+                    const cashRegister = { isOpen: false, initialBalance: 0, totalSales: 0 };
+                    localStorage.setItem('cashRegister', JSON.stringify(cashRegister));
+                    debug('Caja inicializada');
+                }
+
+                if (!localStorage.getItem('salesHistory')) {
+                    localStorage.setItem('salesHistory', JSON.stringify([]));
+                    debug('Historial de ventas inicializado');
+                }
+            }
+
+            setupEventListeners() {
+                debug('Configurando event listeners...');
+                
+                // Navigation
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const module = item.dataset.module;
+                        debug(`Navegando a módulo: ${module}`);
+                        this.switchModule(module);
+                    });
+                });
+
+                // Search
+                const searchInput = document.getElementById('search-product');
+                if (searchInput) {
+                    searchInput.addEventListener('input', (e) => {
+                        this.filterProducts(e.target.value);
+                    });
+                }
+
+                debug('Event listeners configurados');
+            }
+
+            switchModule(module) {
+                debug(`Cambiando a módulo: ${module}`);
+                
+                // Update navigation
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                const navItem = document.querySelector(`[data-module="${module}"]`);
+                if (navItem) navItem.classList.add('active');
+
+                // Update content
+                document.querySelectorAll('.module').forEach(m => {
+                    m.classList.remove('active');
+                });
+                const moduleEl = document.getElementById(`${module}-module`);
+                if (moduleEl) moduleEl.classList.add('active');
+
+                // Update title
+                const titles = {
+                    ventas: 'Ventas (POS)',
+                    productos: 'Productos',
+                    caja: 'Caja',
+                    historial: 'Historial de Ventas'
+                };
+                document.getElementById('module-title').textContent = titles[module];
+
+                this.currentModule = module;
+                this.renderCurrentModule();
+            }
+
+            renderCurrentModule() {
+                debug(`Renderizando módulo: ${this.currentModule}`);
+                
+                switch(this.currentModule) {
+                    case 'ventas':
+                        this.renderProducts();
+                        break;
+                    case 'productos':
+                        this.renderProductsTable();
+                        break;
+                    case 'caja':
+                        this.renderCashRegister();
+                        break;
+                    case 'historial':
+                        this.renderSalesHistory();
+                        break;
+                }
+            }
+
+            renderProducts() {
+                debug('Renderizando productos...');
+                const grid = document.getElementById('products-grid');
+                if (!grid) {
+                    debug('ERROR: products-grid no encontrado');
+                    return;
+                }
+
+                const products = JSON.parse(localStorage.getItem('products')) || [];
+                debug(`Encontrados ${products.length} productos`);
+
+                if (products.length === 0) {
+                    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">No hay productos disponibles</div>';
+                    return;
+                }
+
+                grid.innerHTML = products.map(product => `
+                    <div class="product-card" onclick="pos.addToCart(${product.id})" style="cursor: pointer; border: 2px solid #e9ecef; border-radius: 12px; padding: 15px; text-align: center; transition: all 0.3s ease;">
+                        <div style="font-size: 2rem; margin-bottom: 10px;">${product.image || '📦'}</div>
+                        <div style="font-weight: 600; color: #333; margin-bottom: 5px;">${product.name}</div>
+                        <div style="color: #0099ff; font-weight: 600; font-size: 1.1rem;">$${product.price.toLocaleString('es-CO')}</div>
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                            ${product.type === 'preparado' ? '🍳 Preparado' : '📦 Inventario'}
+                        </div>
+                    </div>
+                `).join('');
+
+                debug('Productos renderizados correctamente');
+            }
+
+            renderProductsTable() {
+                debug('Renderizando tabla de productos...');
+                const tbody = document.getElementById('productos-table');
+                if (!tbody) return;
+
+                const products = JSON.parse(localStorage.getItem('products')) || [];
+                
+                if (products.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #999;">No hay productos registrados</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = products.map(product => `
+                    <tr>
+                        <td>${product.code}</td>
+                        <td>${product.name}</td>
+                        <td>${product.category}</td>
+                        <td>$${product.price.toLocaleString('es-CO')}</td>
+                        <td>${product.type === 'preparado' ? '🍳 Preparado' : '📦 Inventario'}</td>
+                        <td>
+                            <button onclick="pos.editProduct(${product.id})" style="background: #6c757d; color: white; border: none; padding: 5px 10px; margin-right: 5px; cursor: pointer;">Editar</button>
+                            <button onclick="pos.deleteProduct(${product.id})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer;">Eliminar</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            renderCashRegister() {
+                debug('Renderizando estado de caja...');
+                const cashRegister = JSON.parse(localStorage.getItem('cashRegister')) || {};
+                const cerradaEl = document.getElementById('caja-cerrada');
+                const abiertaEl = document.getElementById('caja-abierta');
+
+                if (cashRegister.isOpen) {
+                    cerradaEl.classList.add('hidden');
+                    abiertaEl.classList.remove('hidden');
+                    
+                    document.getElementById('saldo-inicial').textContent = `$${cashRegister.initialBalance.toLocaleString('es-CO')}`;
+                    document.getElementById('total-ventas').textContent = `$${cashRegister.totalSales.toLocaleString('es-CO')}`;
+                    document.getElementById('saldo-esperado').textContent = `$${(cashRegister.initialBalance + cashRegister.totalSales).toLocaleString('es-CO')}`;
+                } else {
+                    cerradaEl.classList.remove('hidden');
+                    abiertaEl.classList.add('hidden');
+                }
+            }
+
+            renderSalesHistory() {
+                debug('Renderizando historial de ventas...');
+                const tbody = document.getElementById('historial-table');
+                if (!tbody) return;
+
+                const sales = JSON.parse(localStorage.getItem('salesHistory')) || [];
+                
+                if (sales.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #999;">No hay ventas registradas</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = sales.slice(-10).reverse().map(sale => {
+                    const date = new Date(sale.date).toLocaleString();
+                    return `
+                        <tr>
+                            <td>${sale.orderId}</td>
+                            <td>${date}</td>
+                            <td>$${sale.total.toLocaleString('es-CO')}</td>
+                            <td>${sale.paymentMethod}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            addToCart(productId) {
+                debug(`Agregando producto ${productId} al carrito`);
+                const products = JSON.parse(localStorage.getItem('products')) || [];
+                const product = products.find(p => p.id === productId);
+                
+                if (!product) {
+                    debug('ERROR: Producto no encontrado');
+                    return;
+                }
+
+                const existingItem = this.cart.find(item => item.id === productId);
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    this.cart.push({ ...product, quantity: 1 });
+                }
+                
+                this.renderCart();
+            }
+
+            renderCart() {
+                debug('Renderizando carrito');
+                const cartItems = document.getElementById('carrito-items');
+                const totalEl = document.getElementById('total');
+                
+                if (!cartItems || !totalEl) return;
+
+                if (this.cart.length === 0) {
+                    cartItems.innerHTML = '<p class="empty-cart">El carrito está vacío</p>';
+                    totalEl.textContent = '$0';
+                    return;
+                }
+
+                cartItems.innerHTML = this.cart.map(item => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #e9ecef;">
+                        <div>
+                            <div style="font-weight: 500;">${item.name}</div>
+                            <div style="font-size: 0.8rem; color: #666;">$${item.price.toLocaleString('es-CO')} c/u</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <button onclick="pos.updateCartQuantity(${item.id}, -1)" style="width: 24px; height: 24px; border: 1px solid #ddd; background: white; cursor: pointer;">-</button>
+                            <span>${item.quantity}</span>
+                            <button onclick="pos.updateCartQuantity(${item.id}, 1)" style="width: 24px; height: 24px; border: 1px solid #ddd; background: white; cursor: pointer;">+</button>
+                            <span style="font-weight: 600; color: #0099ff; min-width: 80px; text-align: right;">$${(item.price * item.quantity).toLocaleString('es-CO')}</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                const total = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                totalEl.textContent = `$${total.toLocaleString('es-CO')}`;
+            }
+
+            updateCartQuantity(productId, change) {
+                const item = this.cart.find(item => item.id === productId);
+                if (!item) return;
+
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    this.cart = this.cart.filter(item => item.id !== productId);
+                }
+                
+                this.renderCart();
+            }
+
+            filterProducts(searchTerm) {
+                debug(`Filtrando productos: ${searchTerm}`);
+                const products = JSON.parse(localStorage.getItem('products')) || [];
+                const filtered = products.filter(product => 
+                    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    product.code.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+                
+                const grid = document.getElementById('products-grid');
+                if (!grid) return;
+
+                if (filtered.length === 0) {
+                    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">No se encontraron productos</div>';
+                    return;
+                }
+
+                grid.innerHTML = filtered.map(product => `
+                    <div class="product-card" onclick="pos.addToCart(${product.id})" style="cursor: pointer; border: 2px solid #e9ecef; border-radius: 12px; padding: 15px; text-align: center; transition: all 0.3s ease;">
+                        <div style="font-size: 2rem; margin-bottom: 10px;">${product.image || '📦'}</div>
+                        <div style="font-weight: 600; color: #333; margin-bottom: 5px;">${product.name}</div>
+                        <div style="color: #0099ff; font-weight: 600; font-size: 1.1rem;">$${product.price.toLocaleString('es-CO')}</div>
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                            ${product.type === 'preparado' ? '🍳 Preparado' : '📦 Inventario'}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            updateDateTime() {
+                const updateDateTime = () => {
+                    const now = new Date();
+                    document.getElementById('datetime').textContent = now.toLocaleString();
+                };
+                updateDateTime();
+                setInterval(updateDateTime, 1000);
+            }
+
+            editProduct(id) {
+                debug(`Editar producto ${id}`);
+                // Implementar edición
+            }
+
+            deleteProduct(id) {
+                if (confirm('¿Estás seguro de eliminar este producto?')) {
+                    const products = JSON.parse(localStorage.getItem('products')) || [];
+                    const filtered = products.filter(p => p.id !== id);
+                    localStorage.setItem('products', JSON.stringify(filtered));
+                    this.renderCurrentModule();
+                }
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            debug('DOM cargado');
+            window.pos = new SimplePOS();
+        });
+    </script>
+</body>
+</html>
