@@ -94,6 +94,236 @@ class POSSystem {
                     price: 25000.00,
                     type: 'preparado',
                     image: '🍋'
+                },
+                {
+                    id: 9,
+                    code: '009',
+                    name: 'Adición Bola de helado',
+                    category: 'Adiciones',
+                    cost: 0,
+                    price: 3500.00,
+                    type: 'adicion',
+                    image: '🍦'
+                },
+                {
+                    id: 10,
+                    code: '010',
+                    name: 'Adición Porción de queso',
+                    category: 'Adiciones',
+                    cost: 0,
+                    price: 4000.00,
+                    type: 'adicion',
+                    image: '🧀'
+                },
+                {
+                    id: 11,
+                    code: '011',
+                    name: 'Adición Porción de Chantilly',
+                    category: 'Adiciones',
+                    cost: 0,
+                    price: 3500.00,
+                    type: 'adicion',
+                    image: '🍦'
+                },
+                {
+                    id: 12,
+                    code: '012',
+                    name: 'Adición Barquillos x2',
+                    category: 'Adiciones',
+                    cost: 0,
+                    price: 500.00,
+                    type: 'adicion',
+                    image: '🍪'
+                },
+                {
+                    id: 13,
+                    code: '013',
+                    name: 'Adición Porción salsa',
+                    category: 'Adiciones',
+                    cost: 0,
+                    price: 500.00,
+                    type: 'adicion',
+                    image: '🥫'
+                },
+                {
+                    id: 14,
+                    code: '014',
+                    name: 'Adición Gomitas x3',
+                    category: 'Adiciones',
+                    cost: 0,
+                    price: 500.00,
+                    type: 'adicion',
+                    image: '🍬'
+                },
+                {
+                    id: 15,
+                    code: '015',
+                    name: 'Adición M&M',
+                    category: 'Adiciones',
+                    cost: 0,
+                    price: 1000.00,
+                    type: 'adicion',
+                    image: '🍫'
+                },
+                {
+                    id: 16,
+                    code: '016',
+                    name: 'Adición Chicles',
+                    category: 'Adiciones',
+                    cost: 0,
+                    price: 900.00,
+                    type: 'adicion',
+                    image: '🍬'
+                },
+                {
+                    id: 17,
+                    code: '017',
+                    name: 'Adición Cono x1',
+                    category: 'Adiciones',
+                    cost: 0,
+                    price: 600.00,
+                    type: 'adicion',
+                    image: '🧇'
+                },
+                {
+                    id: 18,
+                    code: '018',
+                    name: 'Adición Cucurucho x1',
+                    category: 'Adiciones',
+                    cost: 0,
+                    price: 800.00,
+                    type: 'adicion',
+                    image: '🧇'
+                },
+                {
+                    id: 19,
+                    code: '019',
+                    name: 'Adición Brownie',
+                    category: 'Adiciones',
+                    cost: 0,
+                    price: 4000.00,
+                    type: 'adicion',
+                    image: '🍰'
+                },
+                {
+                    id: 20,
+                    code: '020',
+                    name: 'Adición Oreo',
+                    category: 'Adiciones',
+                    cost: 0,
+                    price: 2500.00,
+                    type: 'adicion',
+                    image: '🍪'
+                },
+                {
+                    id: 21,
+                    code: '021',
+                    name: 'Adición Galletas chips',
+                    category: 'Adiciones',
+                    cost: 0,
+                    price: 2000.00,
+                    type: 'adicion',
+                    image: '🍪'
+                },
+                {
+                    id: 22,
+                    code: '022',
+                    name: 'Adición Fresas',
+                    category: 'Adiciones',
+                    cost: 0,
+                    price: 2500.00,
+                    type: 'adicion',
+                    image: '🍓'
+                },
+                {
+                    id: 23,
+                    code: '023',
+                    name: 'Adición Durazno',
+                    category: 'Adiciones',
+                    cost: 0,
+                    price: 3000.00,
+                    type: 'adicion',
+                    image: '🍑'
+                },
+                {
+                    id: 24,
+                    code: '024',
+                    name: 'Adición Bananos',
+                    category: 'Adiciones',
+                    cost: 0,
+                    price: 1500.00,
+                    type: 'adicion',
+                    image: '🍌'
+                },
+                {
+                    id: 25,
+                    code: '025',
+                    name: 'Vasos 1 bola',
+                    category: 'Vasitos',
+                    cost: 0,
+                    price: 4000.00,
+                    type: 'preparado',
+                    image: '🍨'
+                },
+                {
+                    id: 26,
+                    code: '026',
+                    name: 'Vasos 2 bolas',
+                    category: 'Vasitos',
+                    cost: 0,
+                    price: 7000.00,
+                    type: 'preparado',
+                    image: '🍨'
+                },
+                {
+                    id: 27,
+                    code: '027',
+                    name: 'Copa queso',
+                    category: 'Copas',
+                    cost: 0,
+                    price: 17000.00,
+                    type: 'preparado',
+                    image: '🍨'
+                },
+                {
+                    id: 28,
+                    code: '028',
+                    name: 'Copa oreo',
+                    category: 'Copas',
+                    cost: 0,
+                    price: 17000.00,
+                    type: 'preparado',
+                    image: '🍨'
+                },
+                {
+                    id: 29,
+                    code: '029',
+                    name: 'Copa mango',
+                    category: 'Copas',
+                    cost: 0,
+                    price: 17000.00,
+                    type: 'preparado',
+                    image: '🥭'
+                },
+                {
+                    id: 30,
+                    code: '030',
+                    name: 'Copa durazno',
+                    category: 'Copas',
+                    cost: 0,
+                    price: 17000.00,
+                    type: 'preparado',
+                    image: '🍑'
+                },
+                {
+                    id: 31,
+                    code: '031',
+                    name: 'Copa cereza',
+                    category: 'Copas',
+                    cost: 0,
+                    price: 17000.00,
+                    type: 'preparado',
+                    image: '🍒'
                 }
             ];
             localStorage.setItem('products', JSON.stringify(defaultProducts));
