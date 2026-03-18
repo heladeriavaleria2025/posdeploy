@@ -1022,7 +1022,14 @@
                     return;
                 }
 
-                grid.innerHTML = products.map(product => `
+                grid.innerHTML = `
+                    <div class="product-card" onclick="window.pos.addCustomProduct()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; cursor: pointer;">
+                        <div class="product-image" style="font-size: 40px;">✏️</div>
+                        <div class="product-name">Producto Personalizado</div>
+                        <div class="product-price">Ingresa nombre y valor</div>
+                        <div class="product-type">📝 Custom</div>
+                    </div>
+                ` + products.map(product => `
                     <div class="product-card" onclick="window.pos.addToCart(${product.id})">
                         <div class="product-image">${product.image || '📦'}</div>
                         <div class="product-name">${product.name}</div>
@@ -1134,6 +1141,33 @@
                     this.cart.push({ ...product, quantity: 1 });
                 }
                 
+                this.renderCart();
+            }
+
+            addCustomProduct() {
+                const name = prompt('Ingrese el nombre del producto:');
+                if (!name || name.trim() === '') return;
+                
+                const priceStr = prompt('Ingrese el valor del producto:');
+                const price = parseFloat(priceStr.replace(/[^0-9]/g, ''));
+                
+                if (isNaN(price) || price <= 0) {
+                    alert('Por favor ingrese un valor válido');
+                    return;
+                }
+
+                const customProduct = {
+                    id: Date.now(),
+                    code: 'CUSTOM',
+                    name: name.trim(),
+                    category: 'Personalizado',
+                    price: price,
+                    type: 'preparado',
+                    image: '📝',
+                    isCustom: true
+                };
+
+                this.cart.push({ ...customProduct, quantity: 1 });
                 this.renderCart();
             }
 

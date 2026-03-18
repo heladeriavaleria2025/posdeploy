@@ -351,7 +351,14 @@
                     return;
                 }
 
-                grid.innerHTML = products.map(product => `
+                grid.innerHTML = `
+                    <div class="product-card" onclick="pos.addCustomProduct()" style="cursor: pointer; border: 2px solid #667eea; border-radius: 12px; padding: 15px; text-align: center; transition: all 0.3s ease; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <div style="font-size: 2rem; margin-bottom: 10px;">✏️</div>
+                        <div style="font-weight: 600; color: white; margin-bottom: 5px;">Producto Personalizado</div>
+                        <div style="color: #fff; font-weight: 600; font-size: 0.9rem;">Ingresa nombre y valor</div>
+                        <div style="font-size: 0.8rem; color: #eee; margin-top: 5px;">📝 Custom</div>
+                    </div>
+                ` + products.map(product => `
                     <div class="product-card" onclick="pos.addToCart(${product.id})" style="cursor: pointer; border: 2px solid #e9ecef; border-radius: 12px; padding: 15px; text-align: center; transition: all 0.3s ease;">
                         <div style="font-size: 2rem; margin-bottom: 10px;">${product.image || '📦'}</div>
                         <div style="font-weight: 600; color: #333; margin-bottom: 5px;">${product.name}</div>
@@ -453,6 +460,33 @@
                     this.cart.push({ ...product, quantity: 1 });
                 }
                 
+                this.renderCart();
+            }
+
+            addCustomProduct() {
+                const name = prompt('Ingrese el nombre del producto:');
+                if (!name || name.trim() === '') return;
+                
+                const priceStr = prompt('Ingrese el valor del producto:');
+                const price = parseFloat(priceStr.replace(/[^0-9]/g, ''));
+                
+                if (isNaN(price) || price <= 0) {
+                    alert('Por favor ingrese un valor válido');
+                    return;
+                }
+
+                const customProduct = {
+                    id: Date.now(),
+                    code: 'CUSTOM',
+                    name: name.trim(),
+                    category: 'Personalizado',
+                    price: price,
+                    type: 'preparado',
+                    image: '📝',
+                    isCustom: true
+                };
+
+                this.cart.push({ ...customProduct, quantity: 1 });
                 this.renderCart();
             }
 
