@@ -47,6 +47,18 @@
                     </a>
                 </li>
                 <li>
+                    <a href="#" class="nav-item" data-module="diario">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Cierres Diarios</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-item" data-module="credito">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Crédito</span>
+                    </a>
+                </li>
+                <li>
                     <a href="#" class="nav-item" data-module="backup">
                         <i class="fas fa-database"></i>
                         <span>Backup</span>
@@ -144,6 +156,7 @@
                             <tr>
                                 <th>ID Orden</th>
                                 <th>Fecha</th>
+                                <th>Productos</th>
                                 <th>Total</th>
                                 <th>Método Pago</th>
                             </tr>
@@ -152,6 +165,16 @@
                             <!-- Sales history will be loaded here -->
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- Diario Module -->
+            <div id="diario-module" class="module">
+                <div class="module-header">
+                    <h2>Cierres Diarios</h2>
+                </div>
+                <div id="daily-closures-list">
+                    <!-- Daily closures will be loaded here -->
                 </div>
             </div>
 
@@ -259,6 +282,57 @@
                             <i class="fas fa-lock"></i> CERRAR CAJA
                         </button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Credito Module -->
+            <div id="credito-module" class="module">
+                <div class="module-header">
+                    <h2>Crédito</h2>
+                    <button class="btn-primary" onclick="window.pos.openCreditoModal()">
+                        <i class="fas fa-plus"></i> Agregar Crédito
+                    </button>
+                </div>
+                
+                <!-- Resumen de Créditos -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div class="dashboard-card" style="background: white; border: 3px solid #e53935; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 20px rgba(229,57,53,0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                        <div class="card-header" style="color: #e53935;">
+                            <i class="fas fa-clock"></i>
+                            <h3>Pendientes</h3>
+                        </div>
+                        <div class="card-value" style="color: #c62828;" id="creditos-pendientes">$0</div>
+                    </div>
+                    <div class="dashboard-card" style="background: white; border: 3px solid #43a047; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 20px rgba(67,160,71,0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                        <div class="card-header" style="color: #43a047;">
+                            <i class="fas fa-check-circle"></i>
+                            <h3>Pagados</h3>
+                        </div>
+                        <div class="card-value" style="color: #2e7d32;" id="creditos-pagados">$0</div>
+                    </div>
+                    <div class="dashboard-card" style="background: white; border: 3px solid #1e88e5; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 20px rgba(30,136,229,0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                        <div class="card-header" style="color: #1e88e5;">
+                            <i class="fas fa-wallet"></i>
+                            <h3>Total Créditos</h3>
+                        </div>
+                        <div class="card-value" style="color: #1565c0;" id="creditos-total">$0</div>
+                    </div>
+                </div>
+
+                <!-- Pestañas -->
+                <div style="margin-bottom: 20px;">
+                    <button class="btn-secondary" id="tab-pendientes" onclick="window.pos.showCreditoTab('pendientes')" style="margin-right: 10px;">Pendientes</button>
+                    <button class="btn-secondary" id="tab-pagados" onclick="window.pos.showCreditoTab('pagados')">Pagados</button>
+                </div>
+
+                <!-- Lista de Créditos Pendientes -->
+                <div id="creditos-pendientes-list">
+                    <!-- Créditos pendientes se cargan aquí -->
+                </div>
+
+                <!-- Lista de Créditos Pagados -->
+                <div id="creditos-pagados-list" style="display: none;">
+                    <!-- Créditos pagados se cargan aquí -->
                 </div>
             </div>
 
@@ -585,6 +659,7 @@
                 this.setupEventListeners();
                 this.updateDateTime();
                 this.switchModule('ventas');
+                this.updateDashboard();
             }
 
             initializeData() {
@@ -979,6 +1054,8 @@
                     salidas: 'Gestión de Salidas',
                     caja: 'Caja',
                     historial: 'Historial de Ventas',
+                    diario: 'Cierres Diarios',
+                    credito: 'Crédito',
                     backup: 'Backup y Restauración'
                 };
                 document.getElementById('module-title').textContent = titles[module];
@@ -1004,6 +1081,12 @@
                         break;
                     case 'historial':
                         this.renderSalesHistory();
+                        break;
+                    case 'diario':
+                        this.renderDailyClosures();
+                        break;
+                    case 'credito':
+                        this.renderCreditos();
                         break;
                     case 'backup':
                         this.renderBackup();
@@ -1111,21 +1194,47 @@
                 const sales = JSON.parse(localStorage.getItem('salesHistory')) || [];
                 
                 if (sales.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #999;">No hay ventas registradas</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #999;">No hay ventas registradas</td></tr>';
                     return;
                 }
 
-                tbody.innerHTML = sales.slice(-10).reverse().map(sale => {
+                tbody.innerHTML = sales.slice(-20).reverse().map((sale, index) => {
                     const date = new Date(sale.date).toLocaleString();
+                    const itemsCount = sale.items ? sale.items.length : 0;
+                    const itemsList = sale.items ? sale.items.map(item => 
+                        `${item.name} x${item.quantity}`
+                    ).join(', ') : '';
+                    
                     return `
                         <tr>
                             <td>${sale.orderId}</td>
                             <td>${date}</td>
-                            <td>$${sale.total.toLocaleString('es-CO')}</td>
+                            <td>
+                                <span style="cursor: pointer; color: #1976d2; text-decoration: underline;" onclick="window.pos.toggleSaleItems('sale-items-${index}')">
+                                    ${itemsCount} producto(s)
+                                </span>
+                                <div id="sale-items-${index}" style="display: none; margin-top: 8px; padding: 10px; background: #f8f9fa; border-radius: 8px; font-size: 13px;">
+                                    <strong>Detalle:</strong><br>
+                                    ${sale.items ? sale.items.map(item => `
+                                        <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #eee;">
+                                            <span>${item.name}</span>
+                                            <span>x${item.quantity} = $${(item.price * item.quantity).toLocaleString('es-CO')}</span>
+                                        </div>
+                                    `).join('') : 'Sin productos'}
+                                </div>
+                            </td>
+                            <td style="font-weight: bold;">$${sale.total.toLocaleString('es-CO')}</td>
                             <td>${sale.paymentMethod}</td>
                         </tr>
                     `;
                 }).join('');
+            }
+
+            toggleSaleItems(id) {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.display = element.style.display === 'none' ? 'block' : 'none';
+                }
             }
 
             addToCart(productId) {
@@ -1331,6 +1440,26 @@
                 this.updateSalidasDashboard();
             }
 
+            updateDashboard() {
+                const today = new Date().toDateString();
+                const sales = JSON.parse(localStorage.getItem('salesHistory')) || [];
+                const salidas = JSON.parse(localStorage.getItem('salidas')) || [];
+
+                const todaySales = sales.filter(s => new Date(s.date).toDateString() === today)
+                    .reduce((sum, sale) => sum + sale.total, 0);
+                const todaySalidas = salidas.filter(s => new Date(s.timestamp).toDateString() === today)
+                    .reduce((sum, salida) => sum + salida.monto, 0);
+                const balance = todaySales - todaySalidas;
+
+                const ingresosEl = document.getElementById('ingresos-dia');
+                const salidasEl = document.getElementById('salidas-dia');
+                const balanceEl = document.getElementById('balance-dia');
+
+                if (ingresosEl) ingresosEl.textContent = `$${todaySales.toLocaleString('es-CO')}`;
+                if (salidasEl) salidasEl.textContent = `$${todaySalidas.toLocaleString('es-CO')}`;
+                if (balanceEl) balanceEl.textContent = `$${balance.toLocaleString('es-CO')}`;
+            }
+
             renderSalidasTable() {
                 const tbody = document.getElementById('salidas-table');
                 if (!tbody) return;
@@ -1368,7 +1497,7 @@
                 const salidas = JSON.parse(localStorage.getItem('salidas')) || [];
 
                 // Calculate today's sales
-                const todaySales = sales.filter(s => new Date(s.timestamp).toDateString() === today)
+                const todaySales = sales.filter(s => new Date(s.date).toDateString() === today)
                     .reduce((sum, sale) => sum + sale.total, 0);
 
                 // Calculate today's salidas
@@ -1431,7 +1560,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="salida-monto">Monto</label>
-                                    <input type="number" id="salida-monto" step="1000" required>
+                                    <input type="number" id="salida-monto" step="any" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="salida-metodo-pago">Método de Pago</label>
@@ -1478,7 +1607,7 @@
                     timestamp: new Date().toISOString(),
                     concepto: document.getElementById('salida-concepto').value,
                     categoria: document.getElementById('salida-categoria').value,
-                    monto: parseInt(document.getElementById('salida-monto').value),
+                    monto: parseFloat(document.getElementById('salida-monto').value),
                     metodoPago: document.getElementById('salida-metodo-pago').value,
                     responsable: document.getElementById('salida-responsable').value,
                     comprobante: document.getElementById('salida-comprobante').value === 'true'
@@ -1489,6 +1618,7 @@
 
                 this.closeAllModals();
                 this.renderSalidas();
+                this.updateDashboard();
                 
                 // Also update caja if it's the current module to show updated salidas
                 if (this.currentModule === 'caja') {
@@ -1504,6 +1634,7 @@
                 localStorage.setItem('salidas', JSON.stringify(filtered));
 
                 this.renderSalidas();
+                this.updateDashboard();
                 
                 // Also update caja if it's the current module
                 if (this.currentModule === 'caja') {
@@ -1585,11 +1716,27 @@
                 
                 // Calculate today's salidas
                 const today = new Date().toDateString();
+                const todayDate = new Date().toISOString().split('T')[0];
                 const salidas = JSON.parse(localStorage.getItem('salidas')) || [];
-                const todaySalidas = salidas.filter(s => new Date(s.timestamp).toDateString() === today)
-                    .reduce((sum, salida) => sum + salida.monto, 0);
+                const todaySalidas = salidas.filter(s => new Date(s.timestamp).toDateString() === today);
+                const totalSalidas = todaySalidas.reduce((sum, salida) => sum + salida.monto, 0);
                 
-                const totalSistema = cashRegister.initialBalance + cashRegister.totalSales - todaySalidas;
+                // Get today's sales
+                const salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
+                const todaySales = salesHistory.filter(s => new Date(s.date).toDateString() === today);
+                
+                // Calculate totals by payment method
+                const totalEfectivo = todaySales
+                    .filter(s => s.paymentMethod === 'Efectivo')
+                    .reduce((sum, s) => sum + s.total, 0);
+                const totalTransferencia = todaySales
+                    .filter(s => s.paymentMethod === 'Transferencia')
+                    .reduce((sum, s) => sum + s.total, 0);
+                const totalApp = todaySales
+                    .filter(s => s.paymentMethod === 'App Domicilios')
+                    .reduce((sum, s) => sum + s.total, 0);
+                
+                const totalSistema = cashRegister.initialBalance + cashRegister.totalSales - totalSalidas;
                 const diferencia = dineroReal - totalSistema;
                 
                 const diferenciaRow = document.getElementById('diferencia-row');
@@ -1610,15 +1757,57 @@
                     `+$${Math.abs(diferencia).toLocaleString('es-CO')} (Sobrante)` : 
                     `-$${Math.abs(diferencia).toLocaleString('es-CO')} (Faltante)`;
                 if (confirm(`¿Confirmar cierre de caja?\nDiferencia: ${diferenciaTexto}`)) {
-                    cashRegister.isOpen = false;
-                    cashRegister.closeDate = new Date().toISOString();
-                    cashRegister.difference = diferencia;
+                    // Save daily closure
+                    const dailyClosures = JSON.parse(localStorage.getItem('dailyClosures')) || [];
+                    const closureIndex = dailyClosures.findIndex(c => c.date === todayDate);
                     
-                    localStorage.setItem('cashRegister', JSON.stringify(cashRegister));
-                    sessionStorage.setItem('cashRegister', JSON.stringify(cashRegister));
+                    const newClosure = {
+                        date: todayDate,
+                        openedAt: cashRegister.openedAt,
+                        closedAt: new Date().toISOString(),
+                        initialBalance: cashRegister.initialBalance,
+                        totalSales: cashRegister.totalSales,
+                        salesCount: todaySales.length,
+                        sales: todaySales,
+                        totalEfectivo: totalEfectivo,
+                        totalTransferencia: totalTransferencia,
+                        totalApp: totalApp,
+                        totalSalidas: totalSalidas,
+                        salidas: todaySalidas,
+                        moneyInBox: dineroReal,
+                        totalSistema: totalSistema,
+                        difference: diferencia
+                    };
+                    
+                    if (closureIndex >= 0) {
+                        dailyClosures[closureIndex] = newClosure;
+                    } else {
+                        dailyClosures.push(newClosure);
+                    }
+                    
+                    localStorage.setItem('dailyClosures', JSON.stringify(dailyClosures));
+                    
+                    // Reset cash register for new day
+                    const newCashRegister = {
+                        isOpen: false,
+                        initialBalance: 0,
+                        totalSales: 0,
+                        openDate: null,
+                        closeDate: new Date().toISOString(),
+                        difference: diferencia
+                    };
+                    
+                    localStorage.setItem('cashRegister', JSON.stringify(newCashRegister));
+                    sessionStorage.setItem('cashRegister', JSON.stringify(newCashRegister));
+                    
+                    // Clear cart
+                    this.cart = [];
+                    sessionStorage.setItem('cart', JSON.stringify([]));
                     
                     this.closeAllModals();
                     this.renderCurrentModule();
+                    
+                    alert('Cierre de caja realizado y guardado en el historial diario');
                 }
             }
 
@@ -1736,6 +1925,7 @@
                 
                 this.closeAllModals();
                 this.renderCurrentModule();
+                this.updateDashboard();
                 
                 alert('Venta realizada con éxito');
             }
@@ -1756,6 +1946,529 @@
                 document.querySelectorAll('form').forEach(form => {
                     form.reset();
                 });
+            }
+
+            renderDailyClosures() {
+                const container = document.getElementById('daily-closures-list');
+                if (!container) return;
+
+                const closures = JSON.parse(localStorage.getItem('dailyClosures')) || [];
+
+                if (closures.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 60px 20px; color: #666;">
+                            <div style="font-size: 60px; margin-bottom: 20px;">📅</div>
+                            <h3 style="margin-bottom: 10px;">No hay cierres diarios registrados</h3>
+                            <p style="color: #999;">Los cierres de caja se registrarán aquí al cerrar el día</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const sortedClosures = closures.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                container.innerHTML = sortedClosures.map(closure => {
+                    const date = new Date(closure.date);
+                    const formattedDate = date.toLocaleDateString('es-CO', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    });
+
+                    const totalVentas = closure.totalSales || 0;
+                    const totalEfectivo = closure.totalEfectivo || 0;
+                    const totalTransferencia = closure.totalTransferencia || 0;
+                    const totalApp = closure.totalApp || 0;
+                    const totalSalidas = closure.totalSalidas || 0;
+                    const diferencia = closure.difference || 0;
+
+                    return `
+                        <div class="daily-closure-card" onclick="window.pos.toggleDailyClosureDetail('${closure.date}')" style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                                <div>
+                                    <h3 style="margin: 0 0 5px 0; color: #333;">${formattedDate}</h3>
+                                    <span style="background: #e3f2fd; color: #1976d2; padding: 4px 12px; border-radius: 20px; font-size: 14px;">
+                                        ${closure.salesCount} ventas
+                                    </span>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 24px; font-weight: bold; color: #2e7d32;">$${totalVentas.toLocaleString('es-CO')}</div>
+                                    <div style="font-size: 12px; color: #666;">Total Ventas</div>
+                                </div>
+                            </div>
+                            
+                            <div id="detail-${closure.date}" class="daily-closure-detail" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">💵 Efectivo</div>
+                                        <div style="font-size: 18px; font-weight: bold; color: #2e7d32;">$${totalEfectivo.toLocaleString('es-CO')}</div>
+                                    </div>
+                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">🏦 Transferencia</div>
+                                        <div style="font-size: 18px; font-weight: bold; color: #1565c0;">$${totalTransferencia.toLocaleString('es-CO')}</div>
+                                    </div>
+                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">📱 App Domicilios</div>
+                                        <div style="font-size: 18px; font-weight: bold; color: #7b1fa2;">$${totalApp.toLocaleString('es-CO')}</div>
+                                    </div>
+                                </div>
+                                
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">💰 Salida de Caja</div>
+                                        <div style="font-size: 18px; font-weight: bold; color: #c62828;">-$${totalSalidas.toLocaleString('es-CO')}</div>
+                                    </div>
+                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">📊 Base Caja</div>
+                                        <div style="font-size: 18px; font-weight: bold; color: #333;">$${closure.initialBalance.toLocaleString('es-CO')}</div>
+                                    </div>
+                                    <div style="background: ${diferencia >= 0 ? '#e8f5e9' : '#ffebee'}; padding: 15px; border-radius: 8px;">
+                                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">${diferencia >= 0 ? '📈 Sobrante' : '📉 Faltante'}</div>
+                                        <div style="font-size: 18px; font-weight: bold; color: ${diferencia >= 0 ? '#2e7d32' : '#c62828'};">${diferencia >= 0 ? '+' : ''}$${diferencia.toLocaleString('es-CO')}</div>
+                                    </div>
+                                </div>
+                                
+                                ${closure.sales && closure.sales.length > 0 ? `
+                                <div style="margin-top: 20px;">
+                                    <h4 style="margin: 0 0 10px 0; color: #333;">Detalle de Ventas (${closure.sales.length})</h4>
+                                    <div style="max-height: 300px; overflow-y: auto;">
+                                        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                                            <thead>
+                                                <tr style="background: #f5f5f5;">
+                                                    <th style="padding: 8px; text-align: left;">Orden</th>
+                                                    <th style="padding: 8px; text-align: left;">Hora</th>
+                                                    <th style="padding: 8px; text-align: left;">Método</th>
+                                                    <th style="padding: 8px; text-align: right;">Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${closure.sales.map(sale => {
+                                                    const saleDate = new Date(sale.date);
+                                                    return `
+                                                        <tr style="border-bottom: 1px solid #eee;">
+                                                            <td style="padding: 8px;">${sale.orderId}</td>
+                                                            <td style="padding: 8px;">${saleDate.toLocaleTimeString('es-CO', {hour: '2-digit', minute:'2-digit'})}</td>
+                                                            <td style="padding: 8px;">${sale.paymentMethod}</td>
+                                                            <td style="padding: 8px; text-align: right; font-weight: bold;">$${sale.total.toLocaleString('es-CO')}</td>
+                                                        </tr>
+                                                    `;
+                                                }).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                ` : ''}
+                                
+                                ${closure.salidas && closure.salidas.length > 0 ? `
+                                <div style="margin-top: 20px;">
+                                    <h4 style="margin: 0 0 10px 0; color: #333;">Salidas (${closure.salidas.length})</h4>
+                                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                                        <thead>
+                                            <tr style="background: #f5f5f5;">
+                                                <th style="padding: 8px; text-align: left;">Hora</th>
+                                                <th style="padding: 8px; text-align: left;">Concepto</th>
+                                                <th style="padding: 8px; text-align: left;">Categoría</th>
+                                                <th style="padding: 8px; text-align: left;">Método</th>
+                                                <th style="padding: 8px; text-align: right;">Monto</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${closure.salidas.map(salida => {
+                                                const salidaDate = new Date(salida.timestamp);
+                                                return `
+                                                    <tr style="border-bottom: 1px solid #eee;">
+                                                        <td style="padding: 8px;">${salidaDate.toLocaleTimeString('es-CO', {hour: '2-digit', minute:'2-digit'})}</td>
+                                                        <td style="padding: 8px;">${salida.concepto}</td>
+                                                        <td style="padding: 8px;">${salida.categoria}</td>
+                                                        <td style="padding: 8px;">${salida.metodoPago}</td>
+                                                        <td style="padding: 8px; text-align: right; color: #c62828;">-$${salida.monto.toLocaleString('es-CO')}</td>
+                                                    </tr>
+                                                `;
+                                            }).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            toggleDailyClosureDetail(date) {
+                const detail = document.getElementById(`detail-${date}`);
+                if (detail) {
+                    detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
+                }
+            }
+
+            // Crédito Module Functions
+            renderCreditos() {
+                this.updateCreditoDashboard();
+                this.renderCreditosPendientes();
+                this.renderCreditosPagados();
+                this.showCreditoTab('pendientes');
+            }
+
+            updateCreditoDashboard() {
+                const creditos = JSON.parse(localStorage.getItem('creditos')) || [];
+                
+                const pendientes = creditos.filter(c => c.estado === 'pendiente');
+                const pagados = creditos.filter(c => c.estado === 'pagado');
+                
+                const totalPendientes = pendientes.reduce((sum, c) => sum + c.total, 0);
+                const totalPagados = pagados.reduce((sum, c) => sum + c.total, 0);
+                const totalGeneral = totalPendientes + totalPagados;
+
+                document.getElementById('creditos-pendientes').textContent = `$${totalPendientes.toLocaleString('es-CO')}`;
+                document.getElementById('creditos-pagados').textContent = `$${totalPagados.toLocaleString('es-CO')}`;
+                document.getElementById('creditos-total').textContent = `$${totalGeneral.toLocaleString('es-CO')}`;
+            }
+
+            showCreditoTab(tab) {
+                const pendientesList = document.getElementById('creditos-pendientes-list');
+                const pagadosList = document.getElementById('creditos-pagados-list');
+                const tabPendientes = document.getElementById('tab-pendientes');
+                const tabPagados = document.getElementById('tab-pagados');
+
+                if (tab === 'pendientes') {
+                    pendientesList.style.display = 'block';
+                    pagadosList.style.display = 'none';
+                    tabPendientes.classList.remove('btn-secondary');
+                    tabPendientes.classList.add('btn-primary');
+                    tabPagados.classList.remove('btn-primary');
+                    tabPagados.classList.add('btn-secondary');
+                } else {
+                    pendientesList.style.display = 'none';
+                    pagadosList.style.display = 'block';
+                    tabPagados.classList.remove('btn-secondary');
+                    tabPagados.classList.add('btn-primary');
+                    tabPendientes.classList.remove('btn-primary');
+                    tabPendientes.classList.add('btn-secondary');
+                }
+            }
+
+            renderCreditosPendientes() {
+                const container = document.getElementById('creditos-pendientes-list');
+                const creditos = JSON.parse(localStorage.getItem('creditos')) || [];
+                const pendientes = creditos.filter(c => c.estado === 'pendiente');
+
+                if (pendientes.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #999; background: white; border-radius: 12px;">
+                            <div style="font-size: 50px; margin-bottom: 15px;">📋</div>
+                            <p>No hay créditos pendientes</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = pendientes.map((credito, index) => this.renderCreditoCard(credito, index)).join('');
+            }
+
+            renderCreditosPagados() {
+                const container = document.getElementById('creditos-pagados-list');
+                const creditos = JSON.parse(localStorage.getItem('creditos')) || [];
+                const pagados = creditos.filter(c => c.estado === 'pagado');
+
+                if (pagados.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #999; background: white; border-radius: 12px;">
+                            <div style="font-size: 50px; margin-bottom: 15px;">✅</div>
+                            <p>No hay créditos pagados</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = pagados.map((credito, index) => this.renderCreditoCard(credito, index, true)).join('');
+            }
+
+            renderCreditoCard(credito, index, isPagado = false) {
+                const fecha = new Date(credito.fecha).toLocaleDateString('es-CO');
+                const tipoBadge = credito.tipo === 'empleado' ? 
+                    '<span style="background: #e3f2fd; color: #1976d2; padding: 2px 8px; border-radius: 10px; font-size: 11px;">👔 Empleado</span>' :
+                    '<span style="background: #f3e5f5; color: #7b1fa2; padding: 2px 8px; border-radius: 10px; font-size: 11px;">👤 Cliente</span>';
+                
+                const productosHtml = credito.productos.map(p => 
+                    `<div style="display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #eee; font-size: 13px;">
+                        <span>${p.nombre} x${p.cantidad}</span>
+                        <span>$${(p.precio * p.cantidad).toLocaleString('es-CO')}</span>
+                    </div>`
+                ).join('');
+
+                return `
+                    <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                            <div>
+                                <h3 style="margin: 0 0 5px 0; color: #333;">${credito.nombre}</h3>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    ${tipoBadge}
+                                    <span style="color: #666; font-size: 13px;">📅 ${fecha}</span>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 20px; font-weight: bold; color: ${isPagado ? '#2e7d32' : '#c62828'};">
+                                    $${credito.total.toLocaleString('es-CO')}
+                                </div>
+                                <div style="font-size: 11px; color: #666;">
+                                    ${isPagado ? '✅ Pagado' : '⏳ Pendiente'}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                            <strong style="font-size: 12px; color: #666;">Productos:</strong>
+                            ${productosHtml}
+                            <div style="display: flex; justify-content: space-between; padding-top: 8px; margin-top: 5px; border-top: 1px solid #ddd; font-weight: bold;">
+                                <span>Total:</span>
+                                <span>$${credito.total.toLocaleString('es-CO')}</span>
+                            </div>
+                        </div>
+                        
+                        ${credito.notas ? `<div style="font-size: 13px; color: #666; margin-bottom: 10px;"><strong>Notas:</strong> ${credito.notas}</div>` : ''}
+                        
+                        <div style="display: flex; gap: 10px;">
+                            ${!isPagado ? `
+                                <button class="btn-primary" onclick="window.pos.marcarCreditoPagado(${credito.id})" style="flex: 1;">
+                                    💰 Marcar como Pagado
+                                </button>
+                                <button class="btn-danger" onclick="window.pos.eliminarCredito(${credito.id})" style="padding: 10px 15px;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            ` : `
+                                <button class="btn-secondary" onclick="window.pos.verDetalleCredito(${credito.id})" style="flex: 1;">
+                                    🔍 Ver Detalle
+                                </button>
+                                <button class="btn-danger" onclick="window.pos.eliminarCredito(${credito.id})" style="padding: 10px 15px;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }
+
+            openCreditoModal() {
+                let modal = document.getElementById('credito-modal');
+                if (!modal) {
+                    modal = document.createElement('div');
+                    modal.id = 'credito-modal';
+                    modal.className = 'modal';
+                    modal.innerHTML = `
+                        <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+                            <div class="modal-header">
+                                <h3>Agregar Crédito</h3>
+                                <span class="close">&times;</span>
+                            </div>
+                            <form id="credito-form">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <div class="form-group">
+                                        <label for="credito-nombre">Nombre</label>
+                                        <input type="text" id="credito-nombre" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="credito-tipo">Tipo</label>
+                                        <select id="credito-tipo" required>
+                                            <option value="cliente">Cliente</option>
+                                            <option value="empleado">Empleado</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Productos</label>
+                                    <div id="credito-productos-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 10px;">
+                                        <p style="color: #999; text-align: center; margin: 0;">Agregue productos usando el formulario below</p>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; align-items: end;">
+                                        <input type="text" id="credito-producto-nombre" placeholder="Nombre del producto">
+                                        <input type="number" id="credito-producto-precio" placeholder="Precio" step="any">
+                                        <input type="number" id="credito-producto-cantidad" placeholder="Cantidad" value="1" min="1">
+                                        <button type="button" class="btn-secondary" onclick="window.pos.agregarProductoCredito()">+</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="credito-total">Total</label>
+                                    <input type="number" id="credito-total" step="any" required readonly style="background: #e9ecef;">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="credito-notas">Notas (opcional)</label>
+                                    <textarea id="credito-notas" rows="2" placeholder="Observaciones adicionales"></textarea>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="btn-secondary cancel-btn">Cancelar</button>
+                                    <button type="submit" class="btn-primary">Guardar Crédito</button>
+                                </div>
+                            </form>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+
+                    document.getElementById('credito-form').addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.saveCredito();
+                    });
+                }
+
+                this.creditoProductosTemp = [];
+                this.updateCreditoProductosList();
+                modal.style.display = 'block';
+            }
+
+            agregarProductoCredito() {
+                const nombre = document.getElementById('credito-producto-nombre').value;
+                const precio = parseFloat(document.getElementById('credito-producto-precio').value);
+                const cantidad = parseInt(document.getElementById('credito-producto-cantidad').value) || 1;
+
+                if (!nombre || isNaN(precio) || precio <= 0) {
+                    alert('Ingrese nombre y precio válido');
+                    return;
+                }
+
+                if (!this.creditoProductosTemp) {
+                    this.creditoProductosTemp = [];
+                }
+
+                this.creditoProductosTemp.push({ nombre, precio, cantidad });
+
+                document.getElementById('credito-producto-nombre').value = '';
+                document.getElementById('credito-producto-precio').value = '';
+                document.getElementById('credito-producto-cantidad').value = '1';
+
+                this.updateCreditoProductosList();
+            }
+
+            updateCreditoProductosList() {
+                const container = document.getElementById('credito-productos-list');
+                if (!container) return;
+
+                if (!this.creditoProductosTemp || this.creditoProductosTemp.length === 0) {
+                    container.innerHTML = '<p style="color: #999; text-align: center; margin: 0;">Agregue productos usando el formulario below</p>';
+                    document.getElementById('credito-total').value = '';
+                    return;
+                }
+
+                let html = '';
+                let total = 0;
+
+                this.creditoProductosTemp.forEach((p, index) => {
+                    const subtotal = p.precio * p.cantidad;
+                    total += subtotal;
+                    html += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #eee;">
+                            <span>${p.nombre} x${p.cantidad}</span>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span>$${subtotal.toLocaleString('es-CO')}</span>
+                                <button type="button" onclick="window.pos.quitarProductoCredito(${index})" style="background: none; border: none; color: #c62828; cursor: pointer; font-size: 16px;">×</button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+                document.getElementById('credito-total').value = total;
+            }
+
+            quitarProductoCredito(index) {
+                if (this.creditoProductosTemp) {
+                    this.creditoProductosTemp.splice(index, 1);
+                    this.updateCreditoProductosList();
+                }
+            }
+
+            saveCredito() {
+                const nombre = document.getElementById('credito-nombre').value;
+                const tipo = document.getElementById('credito-tipo').value;
+                const total = parseFloat(document.getElementById('credito-total').value);
+                const notas = document.getElementById('credito-notas').value;
+
+                if (!nombre) {
+                    alert('Ingrese el nombre');
+                    return;
+                }
+
+                if (!this.creditoProductosTemp || this.creditoProductosTemp.length === 0) {
+                    alert('Agregue al menos un producto');
+                    return;
+                }
+
+                if (isNaN(total) || total <= 0) {
+                    alert('El total debe ser mayor a 0');
+                    return;
+                }
+
+                const creditos = JSON.parse(localStorage.getItem('creditos')) || [];
+
+                const nuevoCredito = {
+                    id: Date.now(),
+                    fecha: new Date().toISOString(),
+                    nombre: nombre,
+                    tipo: tipo,
+                    productos: [...this.creditoProductosTemp],
+                    total: total,
+                    notas: notas,
+                    estado: 'pendiente'
+                };
+
+                creditos.push(nuevoCredito);
+                localStorage.setItem('creditos', JSON.stringify(creditos));
+
+                this.closeAllModals();
+                this.creditoProductosTemp = [];
+                this.renderCreditos();
+
+                alert('Crédito agregado correctamente');
+            }
+
+            marcarCreditoPagado(creditoId) {
+                if (!confirm('¿Marcar este crédito como pagado?')) return;
+
+                const creditos = JSON.parse(localStorage.getItem('creditos')) || [];
+                const index = creditos.findIndex(c => c.id === creditoId);
+
+                if (index !== -1) {
+                    creditos[index].estado = 'pagado';
+                    creditos[index].fechaPago = new Date().toISOString();
+                    localStorage.setItem('creditos', JSON.stringify(creditos));
+                    this.renderCreditos();
+                    alert('Crédito marcado como pagado');
+                }
+            }
+
+            eliminarCredito(creditoId) {
+                if (!confirm('¿Eliminar este crédito?')) return;
+
+                const creditos = JSON.parse(localStorage.getItem('creditos')) || [];
+                const filtered = creditos.filter(c => c.id !== creditoId);
+                localStorage.setItem('creditos', JSON.stringify(filtered));
+                this.renderCreditos();
+            }
+
+            verDetalleCredito(creditoId) {
+                const creditos = JSON.parse(localStorage.getItem('creditos')) || [];
+                const credito = creditos.find(c => c.id === creditoId);
+
+                if (!credito) return;
+
+                let html = `<div style="padding: 20px;">
+                    <h3>Detalle del Crédito</h3>
+                    <p><strong>Nombre:</strong> ${credito.nombre}</p>
+                    <p><strong>Tipo:</strong> ${credito.tipo === 'empleado' ? 'Empleado' : 'Cliente'}</p>
+                    <p><strong>Fecha:</strong> ${new Date(credito.fecha).toLocaleString('es-CO')}</p>
+                    <p><strong>Estado:</strong> ${credito.estado === 'pagado' ? '✅ Pagado' : '⏳ Pendiente'}</p>
+                    ${credito.fechaPago ? `<p><strong>Fecha Pago:</strong> ${new Date(credito.fechaPago).toLocaleString('es-CO')}</p>` : ''}
+                    <p><strong>Total:</strong> $${credito.total.toLocaleString('es-CO')}</p>
+                    ${credito.notas ? `<p><strong>Notas:</strong> ${credito.notas}</p>` : ''}
+                    <h4>Productos:</h4>
+                    ${credito.productos.map(p => `<p style="margin: 5px 0;">• ${p.nombre} x${p.cantidad} = $${(p.precio * p.cantidad).toLocaleString('es-CO')}</p>`).join('')}
+                </div>`;
+
+                alert(html);
             }
 
             renderBackup() {
